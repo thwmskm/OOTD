@@ -59,13 +59,24 @@ const Home = () => {
     setImageUri(downloadUrl);
   }
 
-  const { pickImage } = useImagePicker("ootd", saveOOTD);
+  const { pickImage } = useImagePicker();
+
+  const handlePickImage = () => {
+    pickImage((uri) => {
+      router.push({
+        pathname: "/EditOOTD",
+        params: {
+          imageUrl: uri,
+        },
+      });
+    });
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.body}>
         <View>
-          <Button title="Upload YUYL" onPress={pickImage}></Button>
+          <Button title="Upload YUYL" onPress={handlePickImage}></Button>
           {imageUri && (
             <Image source={{ uri: imageUri }} style={styles.ootdImage}></Image>
           )}

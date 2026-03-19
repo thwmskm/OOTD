@@ -1,9 +1,9 @@
 import { StyleSheet, View, Pressable, Text, Button } from "react-native";
 import { useRouter } from "expo-router";
 import React, { useState, useEffect } from "react";
-import useOutfitStore from "../../services/stores/outfitStore";
-import GridView from "../components/GridView";
-import { FB_auth, db } from "../../database/firebase";
+import useOutfitStore from "../../../services/stores/outfitStore";
+import GridView from "../../components/GridView";
+import { FB_auth, db } from "../../../database/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 
 //To pick and choose associated clothing items to 'this' outfit based on clothing collection

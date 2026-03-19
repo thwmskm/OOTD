@@ -16,14 +16,17 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import uuid from "react-native-uuid";
 
 //Firebase Imports
-import { FB_auth } from "../../database/firebase";
-import { db } from "../../database/firebase.js";
+import { FB_auth } from "../../../database/firebase";
+import { db } from "../../../database/firebase.js";
 import { doc, getDoc } from "firebase/firestore";
 
 //other file imports
-import { updateClothing, createClothing } from "../../services/clothingService";
-import useClothingStore from "../../services/stores/clothingStore";
-import { storeClothingItem } from "../../services/Storage";
+import {
+  updateClothing,
+  createClothing,
+} from "../../../services/clothingService";
+import useClothingStore from "../../../services/stores/clothingStore";
+import { storeClothingItem } from "../../../services/Storage";
 
 //Misc imports
 import { FontAwesome5 } from "@expo/vector-icons";

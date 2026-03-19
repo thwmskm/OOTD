@@ -1,38 +1,38 @@
 import { StyleSheet, View, Pressable, Text } from "react-native";
 import { useRouter } from "expo-router";
-import useClothingStore from "../../services/stores/clothingStore";
+import useClothingStore from "../../../services/stores/clothingStore";
 
-const INOUT_LIST = ["Indoor", "Outdoor"];
+const TYPE_LIST = ["Top", "Bottom", "One piece", "Shoes", "Hat", "Accessory"];
 
-const InOut = () => {
+const Type = () => {
   const router = useRouter();
   const setClothing = useClothingStore((state) => state.setClothing);
 
-  const inOutPick = (inOut) => {
-    if (inOut) {
-      setClothing("inOut", inOut);
+  const typePick = (type) => {
+    if (type) {
+      setClothing("type", type);
       router.back();
     } else {
-      console.log("Error while picking inOut!");
+      console.log("Error while picking type!");
     }
   };
 
   return (
     <View>
-      {INOUT_LIST.map((inOut) => (
+      {TYPE_LIST.map((type) => (
         <Pressable
-          key={inOut}
-          onPress={() => inOutPick(inOut)}
+          key={type}
+          onPress={() => typePick(type)}
           style={styles.items}
         >
-          <Text>{inOut}</Text>
+          <Text>{type}</Text>
         </Pressable>
       ))}
     </View>
   );
 };
 
-export default InOut;
+export default Type;
 
 const styles = StyleSheet.create({
   items: {

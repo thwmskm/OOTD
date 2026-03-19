@@ -1,6 +1,6 @@
 import { StyleSheet, View, Pressable, Text } from "react-native";
 import { useRouter } from "expo-router";
-import useClothingStore from "../../services/stores/clothingStore";
+import useClothingStore from "../../../services/stores/clothingStore";
 
 const COLOUR_LIST = [
   "black",

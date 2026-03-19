@@ -1,7 +1,7 @@
 import { StyleSheet, View, Pressable, Text } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import useClothingStore from "../../services/stores/clothingStore";
-import useOutfitStore from "../../services/stores/outfitStore";
+import useClothingStore from "../../../services/stores/clothingStore";
+import useOutfitStore from "../../../services/stores/outfitStore";
 
 const SEASON_LIST = ["Spring", "Summer", "Autumn", "Winter", "All year"];
 
