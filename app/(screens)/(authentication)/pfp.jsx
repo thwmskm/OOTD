@@ -1,6 +1,6 @@
 import { Text, StyleSheet, View, Button, Image, Pressable } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useImagePicker } from "../hooks/useImagePicker";
+import { useImagePicker } from "../../hooks/useImagePicker";
 import { useState } from "react";
 
 const Pfp = () => {

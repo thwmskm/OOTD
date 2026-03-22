@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { FB_auth } from "../../database/firebase";
+import { FB_auth } from "../../../database/firebase";
 import { useState } from "react";
 
 export default function Login() {

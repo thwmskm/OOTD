@@ -1,8 +1,8 @@
 import { Text, StyleSheet, View, Button } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { FB_auth } from "../../database/firebase";
+import { FB_auth } from "../../../database/firebase";
 import { useState } from "react";
-import { createUser } from "../../services/userService";
+import { createUser } from "../../../services/userService";
 
 const FinalizeScreen = () => {
   const router = useRouter();
