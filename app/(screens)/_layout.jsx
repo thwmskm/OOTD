@@ -4,8 +4,9 @@ import { Slot, Stack } from "expo-router";
 export default function Layout() {
   return (
     <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="(authentication)" options={{ headerShown: false }} />
+      <Stack.Screen name="(attributes)" options={{ headerShown: false }} />
+      <Stack.Screen name="EditOOTD" options={{ headerShown: false }} />
     </Stack>
   );
 }
