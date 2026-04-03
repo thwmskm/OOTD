@@ -19,9 +19,7 @@ const EditOOTD = () => {
 
   //ootdStore initialization
   const ootd = useOOTDStore((state) => state.ootd);
-  const loadOotd = useOOTDStore((state) => state.loadOotd);
   const setOotd = useOOTDStore((state) => state.setOotd);
-  const resetOotdStore = useOOTDStore((state) => state.resetOotdStore);
 
   //routing back home
   const handleBack = () => {

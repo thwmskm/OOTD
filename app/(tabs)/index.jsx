@@ -12,8 +12,6 @@ import { useFocusEffect, useRouter } from "expo-router";
 import uuid from "react-native-uuid";
 import { storeOOTD } from "../../services/Storage";
 import useOOTDStore from "../../services/stores/ootdStore";
-
-//Firebase Imports
 import { FB_auth } from "../../database/firebase";
 import { db } from "../../database/firebase.js";
 import { doc, getDoc } from "firebase/firestore";
@@ -67,7 +65,6 @@ const Home = () => {
     try {
       await createOOTD(newOOTD);
       console.log("OOTD created");
-      resetOotdStore();
     } catch (error) {
       console.error("Error trying to create ootd", error);
       throw error;
@@ -75,8 +72,8 @@ const Home = () => {
     setImageUri(downloadUrl);
   }
 
+  //handling ootd upload
   const { pickImage } = useImagePicker();
-
   const handlePickImage = () => {
     pickImage((uri) => {
       router.push({
