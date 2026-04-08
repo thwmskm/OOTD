@@ -18,7 +18,6 @@ const EditOOTD = () => {
   const { imageUrl } = useLocalSearchParams();
 
   //ootdStore initialization
-  const ootd = useOOTDStore((state) => state.ootd);
   const setOotd = useOOTDStore((state) => state.setOotd);
 
   //routing back home

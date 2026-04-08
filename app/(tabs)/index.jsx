@@ -6,25 +6,23 @@ import {
   Image,
   Button,
 } from "react-native";
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import { useImagePicker } from "../hooks/useImagePicker";
 import { useFocusEffect, useRouter } from "expo-router";
-import uuid from "react-native-uuid";
 import { storeOOTD } from "../../services/Storage";
 import useOOTDStore from "../../services/stores/ootdStore";
 import { FB_auth } from "../../database/firebase";
-import { db } from "../../database/firebase.js";
-import { doc, getDoc } from "firebase/firestore";
 import { createOOTD } from "../../services/ootdService";
+import { getOOTD } from "../../services/ootdService";
 
 //Opening screen on launch
 const Home = () => {
-  const [imageUri, setImageUri] = useState(null);
   const router = useRouter();
   const user = FB_auth.currentUser;
 
   //ootdStore initialization
   const ootd = useOOTDStore((state) => state.ootd);
+  const setOotd = useOOTDStore((state) => state.setOotd);
   const resetOotdStore = useOOTDStore((state) => state.resetOotdStore);
 
   //trigger saveOOTD on remount if ootdStore attributes are populated
@@ -40,15 +38,20 @@ const Home = () => {
   async function saveOOTD(url) {
     if (!user) return;
 
-    //generate new ootd id
-    const newId = uuid.v4().toString();
+    //create date of upload (YYY-MM-DD)
+    const date = new Date().toISOString().split("T")[0];
+
+    //generate new ootd id (user id_date)
+    const newId = `${user.uid}_${date}`;
+
+    //if this id/ootd already exists, exist saveOOTD
+    //guard for when user launches app with today's ootd already posted before
+    const existing = await getOOTD(newId);
+    if (existing) return;
 
     //obtain downaloadUrl and store image in firebase storage
     const downloadUrl = await storeOOTD(url, newId, user.uid);
     console.log("OOTD uploaded");
-
-    //create date of upload (YYY-MM-DD)
-    const date = new Date().toISOString().split("T")[0];
 
     //Create new ootd instance
     const newOOTD = {
@@ -64,12 +67,12 @@ const Home = () => {
 
     try {
       await createOOTD(newOOTD);
+      setOotd("imageUrl", downloadUrl);
       console.log("OOTD created");
     } catch (error) {
       console.error("Error trying to create ootd", error);
       throw error;
     }
-    setImageUri(downloadUrl);
   }
 
   //handling ootd upload
@@ -89,11 +92,13 @@ const Home = () => {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.body}>
         <View>
-          {!imageUri && (
+          {!ootd.imageUrl ? (
             <Button title="Upload YUYL" onPress={handlePickImage}></Button>
-          )}
-          {imageUri && (
-            <Image source={{ uri: imageUri }} style={styles.ootdImage}></Image>
+          ) : (
+            <Image
+              source={{ uri: ootd.imageUrl }}
+              style={styles.ootdImage}
+            ></Image>
           )}
         </View>
       </View>

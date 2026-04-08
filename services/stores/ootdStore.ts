@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 export type OOTD = {
     imageUrl: string;
-    caption: string;
+    caption?: string;
 };
 
 //Define the ootdStore
