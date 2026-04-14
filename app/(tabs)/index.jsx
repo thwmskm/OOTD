@@ -39,7 +39,8 @@ const Home = () => {
     if (!user) return;
 
     //create date of upload (YYY-MM-DD)
-    const date = new Date().toISOString().split("T")[0];
+    const now = new Date();
+    const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
     //generate new ootd id (user id_date)
     const newId = `${user.uid}_${date}`;
@@ -47,8 +48,9 @@ const Home = () => {
     //if this id/ootd already exists, exist saveOOTD
     //guard for when user launches app with today's ootd already posted before
     const existing = await getOOTD(newId);
-    if (existing) return;
-
+    if (existing) {
+      return;
+    }
     //obtain downaloadUrl and store image in firebase storage
     const downloadUrl = await storeOOTD(url, newId, user.uid);
     console.log("OOTD uploaded");

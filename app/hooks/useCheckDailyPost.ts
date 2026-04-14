@@ -14,13 +14,19 @@ const useCheckDailyPost = (user: User | null) => {
     if (!user) return;
 
     const loadOotd = async () => {
-      const todayId = `${user.uid}_${new Date().toISOString().split('T')[0]}`;
+      const now = new Date();
+      const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const todayId = `${user.uid}_${date}`;
       const populateOotd = await getOOTD(todayId);
+
+      //update ootdStore if today's ootd exists
       if(populateOotd){
+        console.log("ootd found!");
         setOotd("imageUrl", populateOotd.imageUrl);
         setOotd("caption", populateOotd.caption);
       }
       else{
+        console.log("ootd not found!");
         resetOotdStore();
       }
     }
