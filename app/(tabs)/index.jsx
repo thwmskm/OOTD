@@ -14,11 +14,14 @@ import useOOTDStore from "../../services/stores/ootdStore";
 import { FB_auth } from "../../database/firebase";
 import { createOOTD } from "../../services/ootdService";
 import { getOOTD } from "../../services/ootdService";
+import useStreak from "../hooks/useStreak";
 
 //Opening screen on launch
 const Home = () => {
   const router = useRouter();
   const user = FB_auth.currentUser;
+
+  const { updateStreak } = useStreak(user?.uid ?? "");
 
   //ootdStore initialization
   const ootd = useOOTDStore((state) => state.ootd);
@@ -34,6 +37,12 @@ const Home = () => {
     }, [ootd.imageUrl, ootd.caption]),
   );
 
+  //checks and updates streak based on upload
+  async function handleStreak() {
+    if (!user?.uid) return;
+    await updateStreak();
+  }
+
   //save ootd to storage and db on imageUpload complete
   async function saveOOTD(url) {
     if (!user) return;
@@ -45,7 +54,7 @@ const Home = () => {
     //generate new ootd id (user id_date)
     const newId = `${user.uid}_${date}`;
 
-    //if this id/ootd already exists, exist saveOOTD
+    //if this id/ootd already exists, exit saveOOTD
     //guard for when user launches app with today's ootd already posted before
     const existing = await getOOTD(newId);
     if (existing) {
@@ -71,6 +80,8 @@ const Home = () => {
       await createOOTD(newOOTD);
       setOotd("imageUrl", downloadUrl);
       console.log("OOTD created");
+      //update user streak
+      await handleStreak();
     } catch (error) {
       console.error("Error trying to create ootd", error);
       throw error;

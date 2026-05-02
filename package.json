@@ -15,6 +15,7 @@
     "axios": "^1.10.0",
     "expo": "^54.0.2",
     "expo-constants": "~17.1.6",
+    "expo-image": "~3.0.10",
     "expo-image-manipulator": "^14.0.7",
     "expo-image-picker": "~16.1.4",
     "expo-linking": "~7.1.4",
@@ -24,13 +25,13 @@
     "firebase": "^11.8.1",
     "react": "19.0.0",
     "react-native": "0.79.2",
+    "react-native-calendars": "^1.1314.0",
     "react-native-dotenv": "^3.4.11",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.10.0",
     "react-native-uuid": "^2.0.3",
     "uuid": "^11.1.0",
-    "zustand": "^5.0.7",
-    "expo-image": "~3.0.10"
+    "zustand": "^5.0.7"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
