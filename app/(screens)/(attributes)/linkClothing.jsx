@@ -2,8 +2,9 @@ import { StyleSheet, View, Pressable, Text, Button } from "react-native";
 import { useRouter } from "expo-router";
 import React, { useState, useEffect } from "react";
 import useOutfitStore from "../../../services/stores/outfitStore";
+import useUserStore from "../../../services/stores/userStore";
 import GridView from "../../components/GridView";
-import { FB_auth, db } from "../../../database/firebase";
+import { db } from "../../../database/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 
 //To pick and choose associated clothing items to 'this' outfit based on clothing collection
@@ -11,6 +12,7 @@ const linkClothing = () => {
   const router = useRouter();
   const outfit = useOutfitStore((state) => state.outfit);
   const setOutfit = useOutfitStore((state) => state.setOutfit);
+  const user = useUserStore((state) => state.user);
 
   //collection of selected clothing items to be associated to outfit
   const [selected, setSelected] = useState([]);
@@ -22,7 +24,6 @@ const linkClothing = () => {
   useEffect(() => {
     const initClothing = async () => {
       try {
-        const user = FB_auth.currentUser;
         if (!user) return;
 
         const clothingsRef = collection(db, "clothings");

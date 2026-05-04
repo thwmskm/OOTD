@@ -11,17 +11,19 @@ import { useImagePicker } from "../hooks/useImagePicker";
 import { useFocusEffect, useRouter } from "expo-router";
 import { storeOOTD } from "../../services/Storage";
 import useOOTDStore from "../../services/stores/ootdStore";
-import { FB_auth } from "../../database/firebase";
 import { createOOTD } from "../../services/ootdService";
 import { getOOTD } from "../../services/ootdService";
 import useStreak from "../hooks/useStreak";
+import useUserStore from "../../services/stores/userStore";
 
 //Opening screen on launch
 const Home = () => {
   const router = useRouter();
-  const user = FB_auth.currentUser;
 
   const { updateStreak } = useStreak(user?.uid ?? "");
+
+  //userStore initialization
+  const user = useUserStore((state) => state.user);
 
   //ootdStore initialization
   const ootd = useOOTDStore((state) => state.ootd);

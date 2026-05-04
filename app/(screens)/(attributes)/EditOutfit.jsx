@@ -1,7 +1,4 @@
-//React imports
 import React, { useEffect, useState } from "react";
-
-//React Native imports
 import {
   StyleSheet,
   Pressable,
@@ -15,24 +12,18 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import uuid from "react-native-uuid";
-
-//Firebase Imports
-import { FB_auth } from "../../../database/firebase";
 import { db } from "../../../database/firebase.js";
 import { doc, getDoc } from "firebase/firestore";
-
-//other file imports
 import { updateOutfit, createOutfit } from "../../../services/outfitService";
 import useOutfitStore from "../../../services/stores/outfitStore";
+import useUserStore from "../../../services/stores/userStore";
 import { storeOutfit } from "../../../services/Storage";
-
-//Misc imports
 import { FontAwesome5 } from "@expo/vector-icons";
 
 /*-------------------------------------------------------------------------------------------*/
 const EditOutfit = () => {
   const router = useRouter();
-  const user = FB_auth.currentUser;
+  const user = useUserStore((state) => state.user);
   //when editing existing outfit, must identify outfit with oid
   const { imageUrl, oid } = useLocalSearchParams();
 

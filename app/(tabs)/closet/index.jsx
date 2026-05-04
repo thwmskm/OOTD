@@ -13,7 +13,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { useImagePicker } from "../../hooks/useImagePicker";
-import { FB_auth, db } from "../../../database/firebase";
+import useUserStore from "../../../services/stores/userStore";
+import { db } from "../../../database/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import GridView from "../../components/GridView.jsx";
 import FloatButton from "./FloatButton";
@@ -24,10 +25,12 @@ const ClosetIndex = () => {
   const [outfitItems, setOutfitItems] = useState([]);
   const [tabs, setTabs] = useState("clothing");
 
+  //userStore initialization
+  const user = useUserStore((state) => state.user);
+
   //FUNCTION TO CALL THE CLOTHINGS FROM THE CLOSET AND DISPLAY FOR USER
   const fetchClothings = async () => {
     try {
-      const user = FB_auth.currentUser;
       if (!user) return;
 
       const clothingsRef = collection(db, "clothings");
@@ -49,7 +52,6 @@ const ClosetIndex = () => {
   //FUNCTION TO CALL THE OUTFITS FROM THE CLOSET AND DISPLAY FOR USER
   const fetchOutfits = async () => {
     try {
-      const user = FB_auth.currentUser;
       if (!user) return;
 
       const outfitsRef = collection(db, "outfits");

@@ -2,16 +2,20 @@ import { useEffect } from "react";
 import { User } from "firebase/auth";
 import { getOOTD } from "../../services/ootdService";
 import useOOTDStore from "../../services/stores/ootdStore";
+import useUserStore from "../../services/stores/userStore";
 
-const useCheckDailyPost = (user: User | null) => {
+//Check if the OOTD is already posted or not
+const useCheckDailyPost = () => {
+  //ootdStore initialization
+  const resetOotdStore = useOOTDStore((state) => state.resetOotdStore);
+  const setOotd = useOOTDStore((state) => state.setOotd);
 
-    //ootdStore initialization
-      const resetOotdStore = useOOTDStore((state) => state.resetOotdStore);
-      const setOotd = useOOTDStore((state) => state.setOotd);
+  //initialize userStore
+  const user = useUserStore((state) => state.user);
 
-    //check if user has posted daily ootd. If so, populate ootdStore with that ootd object
+  //check if user has posted daily ootd. If so, populate ootdStore with that ootd object
   useEffect(() => {
-    if (!user) return;
+    if (!user.uid) return;
 
     const loadOotd = async () => {
       const now = new Date();
@@ -32,7 +36,7 @@ const useCheckDailyPost = (user: User | null) => {
     }
 
     loadOotd();
-  }, [user]);
+  }, [user.uid]);
 }
 
 export default useCheckDailyPost;

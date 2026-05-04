@@ -2,14 +2,17 @@ import { Text, StyleSheet, View, SafeAreaView, Button } from "react-native";
 import { useRouter } from "expo-router";
 import { FB_auth } from "../../database/firebase";
 import useOOTDStore from "../../services/stores/ootdStore";
+import useUserStore from "../../services/stores/userStore";
 
 const Profile = () => {
   const router = useRouter();
   const resetOotdStore = useOOTDStore((state) => state.resetOotdStore);
+  const resetUserStore = useUserStore((state) => state.resetUserStore);
 
   //temp log out for testing
   const handleLogout = async () => {
     resetOotdStore();
+    resetUserStore();
     await FB_auth.signOut();
   };
 

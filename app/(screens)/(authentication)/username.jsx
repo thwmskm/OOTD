@@ -1,13 +1,10 @@
 import { Text, StyleSheet, View, Button, TextInput } from "react-native";
 import { useRouter } from "expo-router";
-import { FB_auth } from "../../../database/firebase";
 import { useState } from "react";
 
 const Username = () => {
   const router = useRouter();
   const [username, setUsername] = useState("");
-
-  const user = FB_auth.currentUser;
 
   const saveUsername = () => {
     console.log("username page: ", username);

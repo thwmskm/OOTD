@@ -1,11 +1,7 @@
-import { updateUser, getUser } from "../../services/userService";
-import { useCallback, useEffect } from "react";
-
-export type OOTDDayState =
-  | 'never_posted'
-  | 'posted_today'
-  | 'not_posted_today'
-  | 'streak_broken';
+import { updateUser } from "../../services/userService";
+import { useCallback } from "react";
+import { OOTDDayState } from "../../services/stores/userStore";
+import useUserStore from "../../services/stores/userStore";
 
 type StreakCheckResult = {
   dayState: OOTDDayState;
@@ -13,54 +9,62 @@ type StreakCheckResult = {
   MaxStreak: number;
 };
 
-const useStreak = (uid: string) => {
-  const checkStreak = useCallback(async (): Promise<StreakCheckResult | null> => {
-    const userData = await getUser(uid);
-    if (!userData) return null;
+const useStreak = () => {
+  //iniitialze userStore
+  const user = useUserStore((state) => state.user);
+  const setUser = useUserStore((state) => state.setUser);
 
-    const today = new Date();
+  //Check Streak status and return streak data
+  const checkStreak = useCallback((): StreakCheckResult => {
+    const now = new Date();
+    const todayString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
     const yesterday = new Date();
-    yesterday.setDate(today.getDate() - 1);
+    yesterday.setDate(now.getDate() - 1);
+    const yesterdayString = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
 
-    const { lastPostDate: rawLastPostDate, streak, MaxStreak = 0 } = userData;
-    const lastPostDate = rawLastPostDate ? new Date(rawLastPostDate) : null;
-
-    const isToday = lastPostDate?.toDateString() === today.toDateString();
-    const isYesterday = lastPostDate?.toDateString() === yesterday.toDateString();
+    const { lastPostDate, streak, MaxStreak } = user;
 
     let dayState: OOTDDayState;
-    if (!lastPostDate)    dayState = 'never_posted';
-    else if (isToday)     dayState = 'posted_today';
-    else if (isYesterday) dayState = 'not_posted_today';
-    else                  dayState = 'streak_broken';
+    if (!lastPostDate)                        dayState = 'never_posted';
+    else if (lastPostDate === todayString)     dayState = 'posted_today';
+    else if (lastPostDate === yesterdayString) dayState = 'not_posted_today';
+    else                                       dayState = 'streak_broken';
 
     return { dayState, streak, MaxStreak };
-  }, [uid]);
+  }, [user]);
 
+  //Update the streak
   const updateStreak = useCallback(async (): Promise<void> => {
-    const userData = await getUser(uid);
-    if (!userData) return;
+    const now = new Date();
+    const todayString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
-    const today = new Date();
     const yesterday = new Date();
-    yesterday.setDate(today.getDate() - 1);
+    yesterday.setDate(now.getDate() - 1);
+    const yesterdayString = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
 
-    const { lastPostDate: rawLastPostDate, streak, MaxStreak = 0 } = userData;
-    const lastPostDate = rawLastPostDate ? new Date(rawLastPostDate) : null;
+    const { lastPostDate, streak, MaxStreak, uid } = user;
 
-    if (lastPostDate?.toDateString() === today.toDateString()) return;
+    if (lastPostDate === todayString) return;
 
     let newStreak: number;
-    if (!lastPostDate)                                                  newStreak = 1;
-    else if (lastPostDate.toDateString() === yesterday.toDateString()) newStreak = streak + 1;
-    else                                                                newStreak = 1;
+    if (!lastPostDate)                        newStreak = 1;
+    else if (lastPostDate === yesterdayString) newStreak = streak + 1;
+    else                                       newStreak = 1;
 
-    await updateUser(uid, {
+    const updatedFields = {
       streak: newStreak,
-      lastPostDate: today,
-      MaxStreak: Math.max(newStreak, MaxStreak)
-    });
-  }, [uid]);
+      lastPostDate: todayString,
+      MaxStreak: Math.max(newStreak, MaxStreak),
+    };
+
+    await updateUser(uid!, updatedFields);
+
+    // sync store with updated values
+    setUser("streak", updatedFields.streak);
+    setUser("lastPostDate", updatedFields.lastPostDate);
+    setUser("MaxStreak", updatedFields.MaxStreak);
+  }, [user]);
 
   return { checkStreak, updateStreak };
 };
