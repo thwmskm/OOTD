@@ -52,6 +52,6 @@ export const deleteOOTD = async (id: string) => {
     await deleteDoc(ootdRef);
     console.log("OOTD deleted successfully");
   } catch (error) {
-    console.error("Error deleting ootd:", error);
+    throw error;
   }
 };

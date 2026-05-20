@@ -4,7 +4,8 @@ export interface OOTD {
     imageUrl: string;
     date: string; //YYYY-MM-DD
     oid?: string;
-    saves?: number;
+    saves?: number | "0";
+    likes?: number | "0";
     caption?: string;
     createdAt: Date;
 }

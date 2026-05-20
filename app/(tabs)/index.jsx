@@ -5,6 +5,7 @@ import {
   SafeAreaView,
   Image,
   Button,
+  Pressable,
 } from "react-native";
 import React, { useCallback } from "react";
 import { useImagePicker } from "../hooks/useImagePicker";
@@ -15,11 +16,17 @@ import { createOOTD } from "../../services/ootdService";
 import { getOOTD } from "../../services/ootdService";
 import useStreak from "../hooks/useStreak";
 import useUserStore from "../../services/stores/userStore";
+import OOTDView from "../(screens)/OOTDView";
 
 //Opening screen on launch
 const Home = () => {
   const router = useRouter();
 
+  //create date of upload (YYY-MM-DD)
+  const now = new Date();
+  const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+  //initialize useStreak hook
   const { updateStreak } = useStreak(user?.uid ?? "");
 
   //userStore initialization
@@ -45,13 +52,14 @@ const Home = () => {
     await updateStreak();
   }
 
+  //handle logic for when user taps on the ootd post
+  function handleOOTDView() {
+    router.push("/OOTDView");
+  }
+
   //save ootd to storage and db on imageUpload complete
   async function saveOOTD(url) {
     if (!user) return;
-
-    //create date of upload (YYY-MM-DD)
-    const now = new Date();
-    const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
     //generate new ootd id (user id_date)
     const newId = `${user.uid}_${date}`;
@@ -73,6 +81,8 @@ const Home = () => {
       imageUrl: downloadUrl,
       date: date,
       oid: "",
+      saves: 0,
+      likes: 0,
       caption: ootd.caption,
       createdAt: new Date(),
     };
@@ -106,14 +116,26 @@ const Home = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.body}>
+        <View style={styles.header}>
+          <Text>YU*YL</Text>
+          <Text>{date}</Text>
+          {!user ? <Text>--</Text> : <Text>{user.streak}</Text>}
+        </View>
         <View>
           {!ootd.imageUrl ? (
             <Button title="Upload YUYL" onPress={handlePickImage}></Button>
           ) : (
-            <Image
-              source={{ uri: ootd.imageUrl }}
-              style={styles.ootdImage}
-            ></Image>
+            <View style={styles.postArea}>
+              <Pressable onPress={handleOOTDView}>
+                <Image
+                  source={{ uri: ootd.imageUrl }}
+                  style={styles.ootdImage}
+                ></Image>
+              </Pressable>
+              <View>
+                <Text>{ootd.caption}</Text>
+              </View>
+            </View>
           )}
         </View>
       </View>
@@ -129,6 +151,11 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
+  },
+  header: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   ootdImage: {
     width: 300,
