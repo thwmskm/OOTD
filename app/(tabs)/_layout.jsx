@@ -11,6 +11,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <FontAwesome5 size={30} name="" color={color} />
           ),
+          headerShown: false,
         }}
       />
       <Tabs.Screen
@@ -20,6 +21,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <FontAwesome5 size={30} name="" color={color} />
           ),
+          headerShown: false,
         }}
       />
       <Tabs.Screen
@@ -29,6 +31,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <FontAwesome5 size={30} name="search" color={color} />
           ),
+          headerShown: false,
         }}
       />
       <Tabs.Screen
@@ -38,6 +41,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <FontAwesome5 size={30} name="user" color={color} />
           ),
+          headerShown: false,
         }}
       />
     </Tabs>

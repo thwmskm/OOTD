@@ -22,6 +22,9 @@ const FinalizeScreen = () => {
       username: username,
       provider: "email",
       pfp: downloadUrl,
+      streak: 0,
+      MaxStreak: 0,
+      lastPostDate: null,
       createdAt: new Date(),
     };
 

@@ -108,6 +108,7 @@ const ClosetIndex = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <View style={styles.header}></View>
       <View style={styles.div}>
         <View style={styles.tabToggle}>
           <Pressable
@@ -141,9 +142,11 @@ const ClosetIndex = () => {
 export default ClosetIndex;
 
 const styles = StyleSheet.create({
+  header: {
+    height: "15%",
+  },
   div: {
     flex: 1,
-    padding: 10,
   },
   safeArea: {
     flex: 1,

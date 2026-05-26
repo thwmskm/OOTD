@@ -1,9 +1,18 @@
-import { CalendarList } from "react-native-calendars";
+import CalendarScroll from "../components/CalendarScroll";
+import {
+  Text,
+  StyleSheet,
+  View,
+  SafeAreaView,
+  Image,
+  Button,
+  TextInput,
+} from "react-native";
 
 const CalendarView = () => {
   return (
     <View>
-      <CalendarList></CalendarList>
+      <CalendarScroll></CalendarScroll>
     </View>
   );
 };

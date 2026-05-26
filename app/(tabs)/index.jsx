@@ -16,7 +16,8 @@ import { createOOTD } from "../../services/ootdService";
 import { getOOTD } from "../../services/ootdService";
 import useStreak from "../hooks/useStreak";
 import useUserStore from "../../services/stores/userStore";
-import OOTDView from "../(screens)/OOTDView";
+import { FontAwesome5 } from "@expo/vector-icons";
+import { updateUser } from "../../services/userService";
 
 //Opening screen on launch
 const Home = () => {
@@ -48,7 +49,7 @@ const Home = () => {
 
   //checks and updates streak based on upload
   async function handleStreak() {
-    if (!user?.uid) return;
+    if (!user?.uid || !user?.email) return;
     await updateStreak();
   }
 
@@ -115,12 +116,19 @@ const Home = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <View style={styles.header}>
+        <Text>YU*YL</Text>
+        {!user ? <Text>--</Text> : <Text>{user.streak}</Text>}
+        <FontAwesome5
+          name="calendar"
+          size={24}
+          onPress={() => {
+            router.push("/CalendarView");
+          }}
+        />
+      </View>
       <View style={styles.body}>
-        <View style={styles.header}>
-          <Text>YU*YL</Text>
-          <Text>{date}</Text>
-          {!user ? <Text>--</Text> : <Text>{user.streak}</Text>}
-        </View>
+        <Text>{date}</Text>
         <View>
           {!ootd.imageUrl ? (
             <Button title="Upload YUYL" onPress={handlePickImage}></Button>
@@ -153,9 +161,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
+    height: "15%",
     display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
+    padding: 10,
   },
   ootdImage: {
     width: 300,

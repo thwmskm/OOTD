@@ -8,6 +8,7 @@ export type User = {
     streak: number;
     MaxStreak: number;
     lastPostDate: string | null;
+    dayState: OOTDDayState;
 };
 
 export type OOTDDayState =
@@ -34,6 +35,7 @@ const useUserStore = create<userStore>((set) => ({
     streak: 0,
     MaxStreak: 0,
     lastPostDate: null,
+    dayState: "never_posted",
   },
 
   //Reset the store for new user
@@ -47,6 +49,7 @@ const useUserStore = create<userStore>((set) => ({
         streak: 0,
         MaxStreak: 0,
         lastPostDate: null,
+        dayState: "never_posted",
       },
     })),
 

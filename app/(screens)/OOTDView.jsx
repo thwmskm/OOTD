@@ -17,6 +17,7 @@ import { updateOOTD } from "../../services/ootdService";
 import { deleteOOTD } from "../../services/ootdService";
 import { getOOTD } from "../../services/ootdService";
 import { FontAwesome5 } from "@expo/vector-icons";
+import useStreak from "../hooks/useStreak";
 
 const OOTDView = () => {
   const router = useRouter();
@@ -27,6 +28,9 @@ const OOTDView = () => {
   const ootd = useOOTDStore((state) => state.ootd);
   const setOotd = useOOTDStore((state) => state.setOotd);
   const resetOotdStore = useOOTDStore((state) => state.resetOotdStore);
+
+  //initialize useStreak hook
+  const { deleteStreak } = useStreak(user?.uid ?? "");
 
   //states for the likes and saves for the oots post
   const [likes, setLikes] = useState(0);
@@ -82,8 +86,12 @@ const OOTDView = () => {
           onPress: async () => {
             try {
               const id = `${user.uid}_${date}`;
+              //delete ootd from db
               await deleteOOTD(id);
+              //reset ootdStore
               resetOotdStore();
+              //adjust streak accordingly
+              deleteStreak();
               router.replace("/(tabs)");
             } catch (error) {
               console.error("Error deleting ootd:", error);

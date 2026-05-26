@@ -43,12 +43,12 @@ const useStreak = () => {
     yesterday.setDate(now.getDate() - 1);
     const yesterdayString = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
 
-    const { lastPostDate, streak, MaxStreak, uid } = user;
+    const { lastPostDate, streak, MaxStreak, uid, dayState } = user;
 
     if (lastPostDate === todayString) return;
 
     let newStreak: number;
-    if (!lastPostDate)                        newStreak = 1;
+    if (!lastPostDate)                         newStreak = 0;
     else if (lastPostDate === yesterdayString) newStreak = streak + 1;
     else                                       newStreak = 1;
 
@@ -66,7 +66,34 @@ const useStreak = () => {
     setUser("MaxStreak", updatedFields.MaxStreak);
   }, [user]);
 
-  return { checkStreak, updateStreak };
+  //reset streak
+  const resetStreak = useCallback(async (): Promise<void> => {
+    const { uid } = user;
+    if (!uid) return;
+
+    await updateUser(uid, { streak: 0 });
+    setUser("streak", 0);
+  }, [user]);
+
+  //decrease streak for when user deletes ootd post 
+  const deleteStreak = useCallback(async (): Promise<void> => {
+    if (!user?.uid) return;
+
+    const { streak } = user;
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayString = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
+
+    const updatedFields = streak > 1
+      ? { streak: streak - 1, lastPostDate: yesterdayString }
+      : { streak: 0, lastPostDate: null };
+
+    await updateUser(user.uid, updatedFields);
+    setUser("streak", updatedFields.streak);
+    setUser("lastPostDate", updatedFields.lastPostDate);
+  }, [user]);
+
+  return { checkStreak, updateStreak, resetStreak, deleteStreak };
 };
 
 export default useStreak;
