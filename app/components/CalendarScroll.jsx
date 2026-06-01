@@ -9,12 +9,11 @@ import {
 import { CalendarList } from "react-native-calendars";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const CELL_SIZE = SCREEN_WIDTH / 7; // Divides the row evenly into 7 large square cells
+const CELL_SIZE = SCREEN_WIDTH / 7;
 
-// 1. Create a highly optimized Day Component
-const CustomDay = memo(({ date, state, onPress }) => {
-  // state can be 'disabled', 'today', or '' (blank)
+const CustomDay = memo(({ date, state, marking, onPress }) => {
   const isSelectedMonth = state !== "disabled";
+  const isMarked = marking?.marked ?? false;
 
   return (
     <TouchableOpacity
@@ -22,7 +21,7 @@ const CustomDay = memo(({ date, state, onPress }) => {
       onPress={() => isSelectedMonth && onPress(date)}
       disabled={!isSelectedMonth}
     >
-      {/* Container to push text to the bottom right */}
+      {isMarked && isSelectedMonth && <Text style={styles.mark}>*</Text>}
       <View style={styles.textContainer}>
         <Text
           style={[
@@ -38,22 +37,22 @@ const CustomDay = memo(({ date, state, onPress }) => {
   );
 });
 
-const CalendarScroll = () => {
+const CalendarScroll = ({ markedDates = {}, onDayPress, onMonthChange }) => {
   return (
     <CalendarList
-      // 1. Enable Horizontal & Sticky Scrolling
       horizontal={true}
-      pagingEnabled={true} // Snaps to each month like a carousel page
+      pagingEnabled={true}
       calendarWidth={SCREEN_WIDTH}
       style={{ width: SCREEN_WIDTH }}
-      // 2. Control Memory Loading Bounds
-      pastScrollRange={3} // Limit how far back a user can load (e.g., 3 months)
-      futureScrollRange={6} // Limit how far forward a user can load (e.g., 6 months)
-      // 3. Performance / Virtualization Tweaks
-      removeClippedSubviews={true} // Unmounts off-screen months from memory
-      maxToRenderPerBatch={1} // Renders one month at a time
+      pastScrollRange={3}
+      futureScrollRange={6}
+      removeClippedSubviews={true}
+      maxToRenderPerBatch={1}
       updateCellsBatchingPeriod={50}
-      // Override default theme dimensions to support larger cells
+      markedDates={markedDates}
+      onVisibleMonthsChange={(months) => {
+        if (onMonthChange && months[0]) onMonthChange(months[0]);
+      }}
       theme={{
         "stylesheet.calendar.main": {
           week: {
@@ -64,9 +63,13 @@ const CalendarScroll = () => {
           },
         },
       }}
-      // Inject your custom day renderer
-      dayComponent={({ date, state, onPress }) => (
-        <CustomDay date={date} state={state} onPress={onPress} />
+      dayComponent={({ date, state, marking }) => (
+        <CustomDay
+          date={date}
+          state={state}
+          marking={marking}
+          onPress={onDayPress ?? (() => {})}
+        />
       )}
     />
   );
@@ -74,27 +77,35 @@ const CalendarScroll = () => {
 
 export default CalendarScroll;
 
-// 3. Precise Layout Styles
 const styles = StyleSheet.create({
   dayCell: {
     width: CELL_SIZE,
-    height: CELL_SIZE, // Square proportions for extra space
+    height: CELL_SIZE,
     borderWidth: 0.5,
-    borderColor: "#e1e1e1", // Optional grid look
+    borderColor: "#e1e1e1",
     backgroundColor: "#ffffff",
+    overflow: "hidden",
   },
   disabledCell: {
     backgroundColor: "#f9f9f9",
   },
+  mark: {
+    width: 10,
+    height: 10,
+    borderRadius: 3,
+    position: "absolute",
+    top: 6,
+    alignSelf: "center",
+  },
   textContainer: {
     flex: 1,
-    justifyContent: "flex-end", // Pushes content to the bottom
-    alignItems: "flex-end", // Pushes content to the right
-    paddingRight: 6, // Keeps it safe from the edge
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
+    paddingRight: 6,
     paddingBottom: 6,
   },
   dayText: {
-    fontSize: 11, // Much smaller font size
+    fontSize: 11,
     color: "#2d4150",
     fontWeight: "500",
   },

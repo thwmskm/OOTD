@@ -8,7 +8,7 @@ export default function Layout() {
       <Stack.Screen name="(attributes)" options={{ headerShown: false }} />
       <Stack.Screen name="EditOOTD" options={{ headerShown: false }} />
       <Stack.Screen name="OOTDView" options={{ headerShown: false }} />
-      <Stack.Screen name="CalendarView" options={{ headerShown: false }} />
+      <Stack.Screen name="(calendar)" options={{ headerShown: false }} />
     </Stack>
   );
 }

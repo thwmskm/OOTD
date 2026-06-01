@@ -123,7 +123,7 @@ const Home = () => {
           name="calendar"
           size={24}
           onPress={() => {
-            router.push("/CalendarView");
+            router.push("/(calendar)/CalendarView");
           }}
         />
       </View>
