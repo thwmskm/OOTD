@@ -17,6 +17,8 @@ import { getOOTD } from "../../services/ootdService";
 import useStreak from "../hooks/useStreak";
 import useUserStore from "../../services/stores/userStore";
 import { FontAwesome5 } from "@expo/vector-icons";
+import useWeather from "../hooks/useWeather";
+import { interpretWeatherCode } from "../../services/weatherService";
 import { updateUser } from "../../services/userService";
 
 //Opening screen on launch
@@ -37,6 +39,13 @@ const Home = () => {
   const ootd = useOOTDStore((state) => state.ootd);
   const setOotd = useOOTDStore((state) => state.setOotd);
   const resetOotdStore = useOOTDStore((state) => state.resetOotdStore);
+
+  //weather api
+  const { forecast, isLoading } = useWeather();
+  const current = forecast?.current;
+  const { emoji, label } = current
+    ? interpretWeatherCode(current.weatherCode)
+    : { emoji: "—", label: "" };
 
   //trigger saveOOTD on remount if ootdStore attributes are populated
   useFocusEffect(
@@ -130,8 +139,26 @@ const Home = () => {
       <View style={styles.body}>
         <Text>{date}</Text>
         <View>
+          {isLoading ? (
+            <Text>Loading weather...</Text>
+          ) : forecast?.current ? (
+            <View>
+              <Text>
+                {interpretWeatherCode(forecast.current.weatherCode).emoji}{" "}
+                {forecast.current.temp}°C
+              </Text>
+            </View>
+          ) : (
+            <Text>Weather unavailable</Text>
+          )}
+        </View>
+        <View>
           {!ootd.imageUrl ? (
-            <Button title="Upload YUYL" onPress={handlePickImage}></Button>
+            <Button
+              title="Upload YUYL"
+              onPress={handlePickImage}
+              disabled={isLoading}
+            ></Button>
           ) : (
             <View style={styles.postArea}>
               <Pressable onPress={handleOOTDView}>
