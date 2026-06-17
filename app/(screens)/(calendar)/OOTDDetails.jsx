@@ -11,6 +11,7 @@ import {
 import React, { useState, useEffect } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { getOOTD } from "../../../services/ootdService";
+import { interpretWeatherCode } from "../../../services/weatherService";
 
 //displays the selected date's ootd
 const OOTDDetails = () => {
@@ -22,6 +23,8 @@ const OOTDDetails = () => {
   const [likes, setLikes] = useState(undefined);
   const [saves, setSaves] = useState(undefined);
   const [caption, setCaption] = useState(undefined);
+  const [weather, setWeather] = useState(undefined);
+  const [temp, setTemp] = useState(undefined);
   const [image, setImage] = useState(null);
   const [date, setDate] = useState("");
 
@@ -38,6 +41,8 @@ const OOTDDetails = () => {
           setCaption(snap.caption);
           setImage(snap.imageUrl);
           setDate(snap.date);
+          setWeather(interpretWeatherCode(snap.weather.current.weatherCode));
+          setTemp(snap.weather.current.temp);
         }
       } catch (error) {
         console.log("Error fetching details", error);
@@ -59,6 +64,9 @@ const OOTDDetails = () => {
           <View>
             <Text>Likes: {likes}</Text>
             <Text>Saves: {saves}</Text>
+            <Text>
+              {temp}°C - {weather}
+            </Text>
           </View>
 
           <View style={styles.captionArea}>

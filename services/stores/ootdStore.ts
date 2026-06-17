@@ -3,6 +3,7 @@ import { create } from "zustand";
 export type OOTD = {
     imageUrl: string;
     caption?: string;
+    style?: string;
 };
 
 //Define the ootdStore
@@ -18,6 +19,7 @@ const useOOTDStore = create<ootdStore>((set) => ({
   ootd: {
     imageUrl: "",
     caption: "",
+    style: "",
   },
 
   //Reset the store for new ootd
@@ -26,6 +28,7 @@ const useOOTDStore = create<ootdStore>((set) => ({
       ootd: {
         imageUrl: "",
         caption: "",
+        style: "",
       },
     })),
 

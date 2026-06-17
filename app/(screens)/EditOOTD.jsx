@@ -15,6 +15,7 @@ import useOOTDStore from "../../services/stores/ootdStore";
 const EditOOTD = () => {
   const router = useRouter();
   const [caption, setCaption] = useState("");
+  const [style, setStyle] = useState("");
   const { imageUrl } = useLocalSearchParams();
 
   //ootdStore initialization
@@ -29,6 +30,7 @@ const EditOOTD = () => {
   const handlePost = () => {
     setOotd("caption", caption);
     setOotd("imageUrl", imageUrl);
+    setOotd("style", style);
     router.replace("/(tabs)");
   };
 
@@ -46,6 +48,11 @@ const EditOOTD = () => {
         value={caption}
         onChangeText={setCaption}
       ></TextInput>
+      <TextInput
+        style={styles.textBox}
+        value={style}
+        onChangeText={setStyle}
+      ></TextInput>
       <Button style={styles.postBtn} onPress={handlePost} title="Post"></Button>
     </View>
   );
@@ -53,4 +60,8 @@ const EditOOTD = () => {
 
 export default EditOOTD;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  textBox: {
+    border: 1,
+  },
+});

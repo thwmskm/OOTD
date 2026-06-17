@@ -26,7 +26,10 @@
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION"
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_EXTERNAL_STORAGE"
       ],
       "package": "com.anonymous.wardrobeapp"
     },
@@ -40,6 +43,14 @@
         "expo-location",
         {
           "locationWhenInUsePermission": "Allow YU*YL to access your location for weather."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow YU*YL to save your weekly strip to your camera roll.",
+          "savePhotosPermission": "Allow YU*YL to save your weekly strip to your camera roll.",
+          "isAccessMediaLocationEnabled": false
         }
       ]
     ]

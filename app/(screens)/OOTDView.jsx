@@ -39,7 +39,8 @@ const OOTDView = () => {
   //state for editing caption mode
   const [isEditing, setIsEditing] = useState(false);
   //state to keep caption changes
-  const [text, setText] = useState(ootd.caption);
+  const [caption, setCaption] = useState(ootd.caption);
+  const [style, setStyle] = useState(ootd.style);
 
   //create date of upload (YYY-MM-DD)
   const now = new Date();
@@ -112,11 +113,13 @@ const OOTDView = () => {
 
     try {
       const id = `${user.uid}_${date}`;
-      await updateOOTD(id, { caption: text });
-      setOotd("caption", text);
+      await updateOOTD(id, { caption: caption });
+      await updateOOTD(id, { style: style });
+      setOotd("caption", caption);
+      setOotd("style", style);
       toggleEdit();
     } catch (error) {
-      console.log("Error while updating ootd caption", error);
+      console.log("Error while updating ootd", error);
     }
   };
 
@@ -135,6 +138,7 @@ const OOTDView = () => {
       <View style={styles.captionArea}>
         <Text>{ootd.caption}</Text>
       </View>
+      <Text>Style: {ootd.style}</Text>
       <View style={styles.editSection}>
         <FontAwesome5
           name="pencil-alt"
@@ -164,12 +168,18 @@ const OOTDView = () => {
       )}
       <View style={styles.captionArea}>
         <TextInput
-          onChangeText={setText}
-          value={text}
+          onChangeText={setCaption}
+          value={caption}
           defaultValue={ootd.caption}
           style={styles.textInput}
         ></TextInput>
       </View>
+      <TextInput
+        onChangeText={setStyle}
+        value={style}
+        defaultValue={ootd.style}
+        style={styles.textInput}
+      ></TextInput>
       <View style={styles.editSection}>
         <Button title="Save" onPress={handleSave}></Button>
       </View>

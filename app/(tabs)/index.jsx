@@ -93,6 +93,7 @@ const Home = () => {
       oid: "",
       saves: 0,
       likes: 0,
+      weather: current,
       caption: ootd.caption,
       createdAt: new Date(),
     };
@@ -128,13 +129,12 @@ const Home = () => {
       <View style={styles.header}>
         <Text>YU*YL</Text>
         {!user ? <Text>--</Text> : <Text>{user.streak}</Text>}
-        <FontAwesome5
-          name="calendar"
-          size={24}
+        <Button
+          title="week"
           onPress={() => {
-            router.push("/(calendar)/CalendarView");
+            router.push("/WeeklyStrip");
           }}
-        />
+        ></Button>
       </View>
       <View style={styles.body}>
         <Text>{date}</Text>
