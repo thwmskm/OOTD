@@ -1,48 +1,30 @@
-import { StyleSheet, View, Pressable, Text } from "react-native";
+import { StyleSheet, View, Pressable, Text, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import useClothingStore from "../../../services/stores/clothingStore";
-
-const COLOUR_LIST = [
-  "black",
-  "white",
-  "grey",
-  "brown",
-  "beige",
-  "red",
-  "orange",
-  "yellow",
-  "green",
-  "blue",
-  "purple",
-  "pink",
-];
+import ColourPicker from "../../components/ColourPicker";
 
 const Colour = () => {
   const router = useRouter();
   const setClothing = useClothingStore((state) => state.setClothing);
+  const [colour, setColour] = useState(/** @type {string[]} */ ([]));
 
-  const colourPick = (colour) => {
-    if (colour) {
-      setClothing("colour", colour);
+  const handlePick = (selected) => {
+    setColour(selected);
+    if (selected.length === 1) {
+      setClothing("colour", selected[0]);
       router.back();
-    } else {
-      console.log("Error while picking colour!");
     }
   };
 
   return (
-    <View>
-      {COLOUR_LIST.map((colour) => (
-        <Pressable
-          key={colour}
-          onPress={() => colourPick(colour)}
-          style={styles.items}
-        >
-          <View style={[styles.swatch, { backgroundColor: colour }]}></View>
-          <Text>{colour}</Text>
-        </Pressable>
-      ))}
-    </View>
+    <ScrollView>
+      <ColourPicker
+        selected={colour}
+        onChange={handlePick}
+        max={1}
+      ></ColourPicker>
+    </ScrollView>
   );
 };
 

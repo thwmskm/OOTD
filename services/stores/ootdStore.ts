@@ -4,6 +4,7 @@ export type OOTD = {
     imageUrl: string;
     caption?: string;
     style?: string;
+    colourScheme?: string[];
 };
 
 //Define the ootdStore
@@ -20,6 +21,7 @@ const useOOTDStore = create<ootdStore>((set) => ({
     imageUrl: "",
     caption: "",
     style: "",
+    colourScheme: [],
   },
 
   //Reset the store for new ootd
@@ -29,6 +31,7 @@ const useOOTDStore = create<ootdStore>((set) => ({
         imageUrl: "",
         caption: "",
         style: "",
+        colourScheme: [],
       },
     })),
 

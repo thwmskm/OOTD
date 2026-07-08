@@ -8,7 +8,11 @@ const Profile = () => {
   const user = useUserStore((state) => state.user);
   const resetUserStore = useUserStore((state) => state.resetUserStore);
 
+  //handle profile edit
   const handleEdit = () => {};
+
+  //handle posting ootd now
+  const handlePost = () => {};
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -43,24 +47,9 @@ const Profile = () => {
           name="cog"
           size={24}
           onPress={() => {
-            router.push("/settings");
+            router.push("/(settings)/settings");
           }}
         />
-      </View>
-
-      <View style={styles.profileMeta}>
-        <View style={styles.ootdTotal}>
-          <Text>30</Text>
-          <Text>OOTDs</Text>
-        </View>
-        <View style={styles.Followers}>
-          <Text>24</Text>
-          <Text>Followers</Text>
-        </View>
-        <View style={styles.Following}>
-          <Text>14</Text>
-          <Text>Following</Text>
-        </View>
       </View>
 
       <View style={styles.body}>
@@ -68,6 +57,12 @@ const Profile = () => {
           <Text>Current: {user.streak}</Text>
           <Text>Max: {user.MaxStreak}</Text>
         </View>
+        {user.dayState === "not_posted_today" && (
+          <View style={styles.noOOTD}>
+            <Text>you haven't posted a OOTD today.</Text>
+            <Button title="Post Now" onPress={handlePost}></Button>
+          </View>
+        )}
         <View style={styles.statSect}></View>
       </View>
     </SafeAreaView>
@@ -119,13 +114,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginLeft: 10,
   },
-  profileMeta: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 15,
-  },
   streakSect: {
     borderRadius: 20,
     width: "95%",
@@ -133,5 +121,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "lime",
     margin: 10,
+  },
+  noOOTD: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  statSect: {
+    display: "flex",
+    flexDirection: "row",
+    flexWrap: "wrap",
   },
 });

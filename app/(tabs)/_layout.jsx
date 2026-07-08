@@ -9,7 +9,7 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => (
-            <FontAwesome5 size={30} name="" color={color} />
+            <FontAwesome5 size={25} name="home" color={color} />
           ),
           headerShown: false,
         }}
@@ -19,17 +19,17 @@ export default function TabLayout() {
         options={{
           title: "Closet",
           tabBarIcon: ({ color }) => (
-            <FontAwesome5 size={30} name="" color={color} />
+            <FontAwesome5 size={25} name="tshirt" color={color} />
           ),
           headerShown: false,
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="social"
         options={{
-          title: "Explore",
+          title: "Social",
           tabBarIcon: ({ color }) => (
-            <FontAwesome5 size={30} name="search" color={color} />
+            <FontAwesome5 size={25} name="users" color={color} />
           ),
           headerShown: false,
         }}
@@ -39,7 +39,7 @@ export default function TabLayout() {
         options={{
           title: "Profile",
           tabBarIcon: ({ color }) => (
-            <FontAwesome5 size={30} name="user" color={color} />
+            <FontAwesome5 size={25} name="user" color={color} />
           ),
           headerShown: false,
         }}

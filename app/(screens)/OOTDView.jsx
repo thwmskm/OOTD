@@ -7,6 +7,7 @@ import {
   Button,
   TextInput,
   Alert,
+  ScrollView,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import useOOTDStore from "../../services/stores/ootdStore";
@@ -18,6 +19,7 @@ import { deleteOOTD } from "../../services/ootdService";
 import { getOOTD } from "../../services/ootdService";
 import { FontAwesome5 } from "@expo/vector-icons";
 import useStreak from "../hooks/useStreak";
+import ColourPicker, { COLOURS } from "../components/ColourPicker";
 
 const OOTDView = () => {
   const router = useRouter();
@@ -32,8 +34,7 @@ const OOTDView = () => {
   //initialize useStreak hook
   const { deleteStreak } = useStreak(user?.uid ?? "");
 
-  //states for the likes and saves for the oots post
-  const [likes, setLikes] = useState(0);
+  //states for the saves for the oots post
   const [saves, setSaves] = useState(0);
   const [flag, setFlag] = useState(false);
   //state for editing caption mode
@@ -41,6 +42,7 @@ const OOTDView = () => {
   //state to keep caption changes
   const [caption, setCaption] = useState(ootd.caption);
   const [style, setStyle] = useState(ootd.style);
+  const [colourScheme, setColourScheme] = useState(ootd.colourScheme ?? []);
 
   //create date of upload (YYY-MM-DD)
   const now = new Date();
@@ -50,14 +52,13 @@ const OOTDView = () => {
   useEffect(() => {
     if (!user) return;
 
-    setText(ootd.caption);
+    setCaption(ootd.caption);
 
     const fetchOotd = async () => {
       try {
         const id = `${user.uid}_${date}`;
         const fetched = await getOOTD(id);
         if (fetched) {
-          setLikes(fetched.likes ?? 0);
           setSaves(fetched.saves ?? 0);
           setFlag(true);
         }
@@ -110,13 +111,12 @@ const OOTDView = () => {
   //write save to db and toggle back isEditing === false
   const handleSave = async () => {
     if (!user) return;
-
     try {
       const id = `${user.uid}_${date}`;
-      await updateOOTD(id, { caption: caption });
-      await updateOOTD(id, { style: style });
+      await updateOOTD(id, { caption, style, colourScheme });
       setOotd("caption", caption);
       setOotd("style", style);
+      setOotd("colourScheme", colourScheme);
       toggleEdit();
     } catch (error) {
       console.log("Error while updating ootd", error);
@@ -129,7 +129,6 @@ const OOTDView = () => {
       <Image source={{ uri: ootd.imageUrl }} style={styles.ootdImage}></Image>
       {flag ? (
         <View>
-          <Text>Likes: {likes}</Text>
           <Text>Saves: {saves}</Text>
         </View>
       ) : (
@@ -139,6 +138,17 @@ const OOTDView = () => {
         <Text>{ootd.caption}</Text>
       </View>
       <Text>Style: {ootd.style}</Text>
+      <View style={styles.tagRow}>
+        {(ootd.colourScheme ?? []).map((label) => {
+          const hex = COLOURS.find((c) => c.label === label)?.hex ?? "#ccc";
+          return (
+            <View key={label} style={styles.tag}>
+              <View style={[styles.tagSwatch, { backgroundColor: hex }]} />
+              <Text style={styles.tagLabel}>{label}</Text>
+            </View>
+          );
+        })}
+      </View>
       <View style={styles.editSection}>
         <FontAwesome5
           name="pencil-alt"
@@ -155,12 +165,11 @@ const OOTDView = () => {
       </View>
     </>
   ) : (
-    <>
+    <ScrollView style={styles.body}>
       <Text>{date}</Text>
       <Image source={{ uri: ootd.imageUrl }} style={styles.ootdImage}></Image>
       {flag ? (
         <View>
-          <Text>Likes: {likes}</Text>
           <Text>Saves: {saves}</Text>
         </View>
       ) : (
@@ -180,16 +189,21 @@ const OOTDView = () => {
         defaultValue={ootd.style}
         style={styles.textInput}
       ></TextInput>
+      <ColourPicker selected={colourScheme} onChange={setColourScheme} />
       <View style={styles.editSection}>
         <Button title="Save" onPress={handleSave}></Button>
       </View>
-    </>
+    </ScrollView>
   );
 };
 
 export default OOTDView;
 
 const styles = StyleSheet.create({
+  body: {
+    marginTop: 50,
+    marginBottom: 50,
+  },
   textInput: {
     borderWidth: 1,
     borderColor: "black",
@@ -197,5 +211,31 @@ const styles = StyleSheet.create({
   ootdImage: {
     width: 300,
     height: 400,
+  },
+  tagRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginVertical: 6,
+  },
+  tag: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  tagSwatch: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 0.5,
+    borderColor: "#ccc",
+  },
+  tagLabel: {
+    fontSize: 12,
+    textTransform: "capitalize",
   },
 });

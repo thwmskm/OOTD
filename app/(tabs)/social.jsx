@@ -1,16 +1,16 @@
 import { Text, StyleSheet, View, SafeAreaView } from "react-native";
 
-const Explore = () => {
+const Social = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.div}>
-        <Text>This is the explore screen!</Text>
+        <Text>COMING SOON!</Text>
       </View>
     </SafeAreaView>
   );
 };
 
-export default Explore;
+export default Social;
 
 const styles = StyleSheet.create({
   div: {

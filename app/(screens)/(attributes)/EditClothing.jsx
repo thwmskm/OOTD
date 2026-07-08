@@ -21,6 +21,7 @@ import useClothingStore from "../../../services/stores/clothingStore";
 import useUserStore from "../../../services/stores/userStore";
 import { storeClothingItem } from "../../../services/Storage";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { COLOURS } from "../../components/ColourPicker.jsx";
 
 /*-------------------------------------------------------------------------------------------*/
 const EditClothing = () => {
@@ -150,10 +151,20 @@ const EditClothing = () => {
       >
         <Text>Colour:</Text>
         {clothing.colour && (
-          <View>
+          <View style={styles.colourRow}>
             <View
-              style={[styles.swatch, { backgroundColor: clothing.colour }]}
-            ></View>
+              style={[
+                styles.swatch,
+                {
+                  backgroundColor:
+                    COLOURS.find((c) => c.label === clothing.colour)?.hex ??
+                    "#ccc",
+                },
+                ["white", "cream", "silver", "beige"].includes(
+                  clothing.colour,
+                ) && styles.swatchBordered,
+              ]}
+            />
             <Text>{clothing.colour}</Text>
           </View>
         )}
@@ -236,5 +247,15 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderWidth: 1,
+  },
+  colourRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 4,
+  },
+  swatchBordered: {
+    borderWidth: 1,
+    borderColor: "#ccc",
   },
 });

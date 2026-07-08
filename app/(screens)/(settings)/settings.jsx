@@ -9,11 +9,13 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import { FB_auth } from "../../database/firebase";
-import useOOTDStore from "../../services/stores/ootdStore";
-import useUserStore from "../../services/stores/userStore";
+import { FB_auth } from "../../../database/firebase";
+import useOOTDStore from "../../../services/stores/ootdStore";
+import useUserStore from "../../../services/stores/userStore";
+import { useRouter } from "expo-router";
 
 const Settings = () => {
+  const router = useRouter();
   const resetOotdStore = useOOTDStore((state) => state.resetOotdStore);
   const resetUserStore = useUserStore((state) => state.resetUserStore);
 
@@ -39,14 +41,16 @@ const Settings = () => {
     <ScrollView style={styles.body}>
       <View style={styles.sections}>
         <Text style={styles.label}>Account</Text>
-        <Pressable style={styles.setting}>
+        <Pressable
+          style={styles.setting}
+          onPress={() => {
+            router.push("/info");
+          }}
+        >
           <Text style={styles.settingName}>Info</Text>
         </Pressable>
         <Pressable style={styles.setting}>
-          <Text style={styles.settingName}>Privacy</Text>
-        </Pressable>
-        <Pressable style={styles.setting}>
-          <Text style={styles.settingName}>My Saves</Text>
+          <Text style={styles.settingName}>Account Privacy</Text>
         </Pressable>
         <Pressable style={styles.setting}>
           <Text style={[styles.settingName, styles.danger]}>
@@ -60,19 +64,13 @@ const Settings = () => {
       <View style={styles.sections}>
         <Text style={styles.label}>Preferences</Text>
         <Pressable style={styles.setting}>
-          <Text style={styles.settingName}>Turn off Likes/Saves</Text>
+          <Text style={styles.settingName}>Turn off Saves</Text>
         </Pressable>
         <Pressable style={styles.setting}>
           <Text style={styles.settingName}>Notifications</Text>
         </Pressable>
         <Pressable style={styles.setting}>
-          <Text style={styles.settingName}>Language</Text>
-        </Pressable>
-        <Pressable style={styles.setting}>
           <Text style={styles.settingName}>Temperature Unit</Text>
-        </Pressable>
-        <Pressable style={styles.setting}>
-          <Text style={styles.settingName}>Currency</Text>
         </Pressable>
       </View>
       <View style={styles.sections}>
@@ -90,7 +88,7 @@ const Settings = () => {
           <Text style={styles.settingName}>Service Terms</Text>
         </Pressable>
         <Pressable style={styles.setting}>
-          <Text style={styles.settingName}>Privacy Service</Text>
+          <Text style={styles.settingName}>Privacy Policy</Text>
         </Pressable>
       </View>
       <View style={styles.footer}></View>
@@ -103,12 +101,11 @@ export default Settings;
 const styles = StyleSheet.create({
   body: {
     backgroundColor: "lightgray",
-    height: "100%",
     paddingBottom: 50,
   },
   sections: {
     margin: 15,
-    borderRadius: "3%",
+    borderRadius: 8,
     backgroundColor: "white",
     padding: 10,
   },
