@@ -2,6 +2,7 @@ import { Text, StyleSheet, View, SafeAreaView, Button } from "react-native";
 import { useRouter } from "expo-router";
 import useUserStore from "../../services/stores/userStore";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { useImagePicker } from "../hooks/useImagePicker";
 
 const Profile = () => {
   const router = useRouter();
@@ -12,7 +13,17 @@ const Profile = () => {
   const handleEdit = () => {};
 
   //handle posting ootd now
-  const handlePost = () => {};
+  const { pickImage } = useImagePicker();
+  const handlePickImage = () => {
+    pickImage((uri) => {
+      router.push({
+        pathname: "/EditOOTD",
+        params: {
+          imageUrl: uri,
+        },
+      });
+    });
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -60,7 +71,7 @@ const Profile = () => {
         {user.dayState === "not_posted_today" && (
           <View style={styles.noOOTD}>
             <Text>you haven't posted a OOTD today.</Text>
-            <Button title="Post Now" onPress={handlePost}></Button>
+            <Button title="Post Now" onPress={handlePickImage}></Button>
           </View>
         )}
         <View style={styles.statSect}></View>

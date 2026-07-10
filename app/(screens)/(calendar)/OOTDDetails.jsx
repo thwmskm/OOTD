@@ -41,8 +41,10 @@ const OOTDDetails = () => {
           setCaption(snap.caption);
           setImage(snap.imageUrl);
           setDate(snap.date);
-          setWeather(interpretWeatherCode(snap.weather.current.weatherCode));
-          setTemp(snap.weather.current.temp);
+          if (snap.weather) {
+            setWeather(snap.weather.weatherCode);
+            setTemp(snap.weather.temp);
+          }
         }
       } catch (error) {
         console.log("Error fetching details", error);
@@ -64,9 +66,12 @@ const OOTDDetails = () => {
           <View>
             <Text>Likes: {likes}</Text>
             <Text>Saves: {saves}</Text>
-            <Text>
-              {temp}°C - {weather}
-            </Text>
+            {weather !== undefined && (
+              <Text>
+                {temp}°C - {interpretWeatherCode(weather).emoji}{" "}
+                {interpretWeatherCode(weather).label}
+              </Text>
+            )}
           </View>
 
           <View style={styles.captionArea}>
