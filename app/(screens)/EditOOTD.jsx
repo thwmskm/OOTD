@@ -38,6 +38,7 @@ const EditOOTD = () => {
     setOotd("imageUrl", imageUrl);
     setOotd("style", style);
     setOotd("colourScheme", colourScheme);
+    setOotd("saveFlag", true);
     router.replace("/(tabs)");
   };
 
@@ -79,7 +80,8 @@ const styles = StyleSheet.create({
   },
   image: {
     width: "100%",
-    height: 300,
+    height: 500,
+    resizeMode: "contain",
   },
   textBox: {
     borderWidth: 1,

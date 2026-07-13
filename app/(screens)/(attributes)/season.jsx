@@ -12,6 +12,7 @@ const Season = () => {
   const setOutfit = useOutfitStore((state) => state.setOutfit);
 
   const seasonPick = (season) => {
+    console.log(type);
     if (type === "clothing") {
       if (season) {
         setClothing("season", season);

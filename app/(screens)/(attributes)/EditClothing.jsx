@@ -189,7 +189,7 @@ const EditClothing = () => {
       </View>
       <Pressable
         onPress={() =>
-          router.push({ pathname: "/season", param: { type: "clothing" } })
+          router.push({ pathname: "/season", params: { type: "clothing" } })
         }
         style={styles.attribute}
       >

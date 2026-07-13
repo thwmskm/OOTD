@@ -68,12 +68,13 @@ const Profile = () => {
           <Text>Current: {user.streak}</Text>
           <Text>Max: {user.MaxStreak}</Text>
         </View>
-        {user.dayState === "not_posted_today" && (
-          <View style={styles.noOOTD}>
-            <Text>you haven't posted a OOTD today.</Text>
-            <Button title="Post Now" onPress={handlePickImage}></Button>
-          </View>
-        )}
+        {user.dayState === "not_posted_today" ||
+          (user.dayState === "streak_broken" && (
+            <View style={styles.noOOTD}>
+              <Text>you haven't posted a OOTD today.</Text>
+              <Button title="Post Now" onPress={handlePickImage}></Button>
+            </View>
+          ))}
         <View style={styles.statSect}></View>
       </View>
     </SafeAreaView>

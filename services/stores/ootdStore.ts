@@ -5,6 +5,7 @@ export type OOTD = {
     caption?: string;
     style?: string;
     colourScheme?: string[];
+    saveFlag?: boolean; 
 };
 
 //Define the ootdStore
@@ -22,6 +23,7 @@ const useOOTDStore = create<ootdStore>((set) => ({
     caption: "",
     style: "",
     colourScheme: [],
+    saveFlag: false,
   },
 
   //Reset the store for new ootd
@@ -32,6 +34,7 @@ const useOOTDStore = create<ootdStore>((set) => ({
         caption: "",
         style: "",
         colourScheme: [],
+        saveFlag: false,
       },
     })),
 

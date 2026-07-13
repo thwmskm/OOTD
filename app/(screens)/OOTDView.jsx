@@ -43,12 +43,14 @@ const OOTDView = () => {
   const [caption, setCaption] = useState(ootd.caption);
   const [style, setStyle] = useState(ootd.style);
   const [colourScheme, setColourScheme] = useState(ootd.colourScheme ?? []);
+  //state for createdAt for editing/deleting permissions
+  const [createdAt, setCreatedAt] = useState("");
 
   //create date of upload (YYY-MM-DD)
   const now = new Date();
   const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
-  //Fetch likes and saves from db
+  //Fetch saves from db
   useEffect(() => {
     if (!user) return;
 
@@ -60,6 +62,7 @@ const OOTDView = () => {
         const fetched = await getOOTD(id);
         if (fetched) {
           setSaves(fetched.saves ?? 0);
+          setCreatedAt(fetched.createdAt);
           setFlag(true);
         }
       } catch (error) {
@@ -69,6 +72,10 @@ const OOTDView = () => {
 
     fetchOotd();
   }, [user?.uid, date, ootd.caption]);
+
+  //condition to see if edit duration is up or not
+  const canEdit =
+    createdAt && Date.now() - createdAt.toMillis() < 10 * 60 * 1000;
 
   //toggle between editing and not editing state
   const toggleEdit = () => setIsEditing((prev) => !prev);
@@ -149,20 +156,24 @@ const OOTDView = () => {
           );
         })}
       </View>
-      <View style={styles.editSection}>
-        <FontAwesome5
-          name="pencil-alt"
-          size={24}
-          color="black"
-          onPress={toggleEdit}
-        />
-        <FontAwesome5
-          name="trash"
-          size={24}
-          color="black"
-          onPress={handleDelete}
-        />
-      </View>
+      {canEdit === true ? (
+        <View style={styles.editSection}>
+          <FontAwesome5
+            name="pencil-alt"
+            size={24}
+            color="black"
+            onPress={toggleEdit}
+          />
+          <FontAwesome5
+            name="trash"
+            size={24}
+            color="black"
+            onPress={handleDelete}
+          />
+        </View>
+      ) : (
+        <></>
+      )}
     </>
   ) : (
     <ScrollView style={styles.body}>

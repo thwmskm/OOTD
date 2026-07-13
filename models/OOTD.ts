@@ -12,5 +12,5 @@ export interface OOTD {
     caption?: string;
     style?: string;
     createdAt: Date;
-    colourSCheme?: string[];
+    colourScheme?: string[];
 }

@@ -24,6 +24,7 @@ import { deleteClothing } from "../../../services/clothingService";
 import { updateClothing } from "../../../services/clothingService";
 import { deleteOutfit } from "../../../services/outfitService";
 import { updateOutfit } from "../../../services/outfitService";
+import { COLOURS } from "../../components/ColourPicker.jsx";
 
 //firebase imports
 import { db } from "../../../database/firebase";
@@ -186,7 +187,7 @@ const Item = () => {
   };
 
   return (
-    <View>
+    <View style={styles.body}>
       <FontAwesome5
         name="arrow-left"
         size={24}
@@ -215,9 +216,24 @@ const Item = () => {
           <>
             <View style={styles.colourInfo}>
               <Text>Colour: {clothing.colour}</Text>
-              <View
-                style={[styles.swatch, { backgroundColor: clothing.colour }]}
-              ></View>
+              {clothing.colour && (
+                <View style={styles.colourRow}>
+                  <View
+                    style={[
+                      styles.swatch,
+                      {
+                        backgroundColor:
+                          COLOURS.find((c) => c.label === clothing.colour)
+                            ?.hex ?? "#ccc",
+                      },
+                      ["white", "cream", "silver", "beige"].includes(
+                        clothing.colour,
+                      ) && styles.swatchBordered,
+                    ]}
+                  />
+                  <Text>{clothing.colour}</Text>
+                </View>
+              )}
             </View>
             <View style={styles.brandInfo}>
               <Text>Brand: {clothing.brand}</Text>
@@ -282,6 +298,9 @@ const Item = () => {
 export default Item;
 
 const styles = StyleSheet.create({
+  body: {
+    marginTop: 50,
+  },
   backBtn: {
     width: "10%",
     backgroundColor: "none",

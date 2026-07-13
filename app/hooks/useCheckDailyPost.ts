@@ -28,6 +28,8 @@ const useCheckDailyPost = () => {
         console.log("ootd found!");
         setOotd("imageUrl", populateOotd.imageUrl);
         setOotd("caption", populateOotd.caption);
+        setOotd("style", populateOotd.style);
+        setOotd("colourScheme", populateOotd.colourScheme);
       }
       else{
         console.log("ootd not found!");

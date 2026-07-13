@@ -12,6 +12,7 @@ export const createOOTD = async (ootd: OOTD) => {
         console.log("OOTD Creation Success!");
     } catch (error) {
         console.error("Error while creating ootd: ", error);
+        throw error;
     }
 };
 
@@ -41,6 +42,7 @@ export const updateOOTD = async (id: string, updates: Partial<OOTD>) => {
         console.log("OOTD Update Success!");
     } catch (error) {
         console.log("Error while updating ootd: ", error);
+        throw error;
     }
 };
 

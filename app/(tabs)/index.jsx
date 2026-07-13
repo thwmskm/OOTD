@@ -14,6 +14,7 @@ import { storeOOTD } from "../../services/Storage";
 import useOOTDStore from "../../services/stores/ootdStore";
 import { createOOTD } from "../../services/ootdService";
 import { getOOTD } from "../../services/ootdService";
+import { updateOOTD } from "../../services/ootdService";
 import useStreak from "../hooks/useStreak";
 import useUserStore from "../../services/stores/userStore";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -29,11 +30,11 @@ const Home = () => {
   const now = new Date();
   const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
-  //initialize useStreak hook
-  const { updateStreak } = useStreak(user?.uid ?? "");
-
   //userStore initialization
   const user = useUserStore((state) => state.user);
+
+  //initialize useStreak hook
+  const { updateStreak } = useStreak(user?.uid ?? "");
 
   //ootdStore initialization
   const ootd = useOOTDStore((state) => state.ootd);
@@ -47,13 +48,13 @@ const Home = () => {
     ? interpretWeatherCode(current.weatherCode)
     : { emoji: "—", label: "" };
 
-  //trigger saveOOTD on remount if ootdStore attributes are populated
+  //trigger saveOOTD on remount if ootdStore saveFlag is true (only on initial save from EdtiOOTD)
   useFocusEffect(
     useCallback(() => {
-      if (ootd.imageUrl && ootd.caption) {
+      if (ootd.saveFlag) {
         saveOOTD(ootd.imageUrl);
       }
-    }, [ootd.imageUrl, ootd.caption]),
+    }, [ootd.saveFlag]),
   );
 
   //checks and updates streak based on upload
@@ -74,12 +75,6 @@ const Home = () => {
     //generate new ootd id (user id_date)
     const newId = `${user.uid}_${date}`;
 
-    //if this id/ootd already exists, exit saveOOTD
-    //guard for when user launches app with today's ootd already posted before
-    const existing = await getOOTD(newId);
-    if (existing) {
-      return;
-    }
     //obtain downaloadUrl and store image in firebase storage
     const downloadUrl = await storeOOTD(url, newId, user.uid);
     console.log("OOTD uploaded");
@@ -92,8 +87,9 @@ const Home = () => {
       date: date,
       oid: "",
       saves: 0,
-      likes: 0,
       weather: current,
+      colourScheme: ootd.colourScheme,
+      style: ootd.style,
       caption: ootd.caption,
       createdAt: new Date(),
     };
@@ -103,6 +99,7 @@ const Home = () => {
       await createOOTD(newOOTD);
       setOotd("imageUrl", downloadUrl);
       console.log("OOTD created");
+      setOotd("saveFlag", false);
       //update user streak
       await handleStreak();
     } catch (error) {
