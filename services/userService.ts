@@ -12,6 +12,7 @@ export const createUser = async (user: User) => {
         console.log("User Creation Success!");
     } catch (error) {
         console.error("Error while creating user: ", error);
+        throw error;
     }
 };
 
@@ -40,7 +41,8 @@ export const updateUser = async (uid: string, updates: Partial<User>) => {
         await updateDoc(userRef, updates);
         console.log("User Update Success!");
     } catch (error) {
-        console.log("Error while updating user: ", error);
+        console.error("Error while updating user: ", error);
+        throw error;
     }
 };
 
@@ -53,5 +55,6 @@ export const deleteUser = async (uid: string) => {
     console.log("User deleted successfully");
   } catch (error) {
     console.error("Error deleting user:", error);
+    throw error;
   }
 };

@@ -1,4 +1,11 @@
-import { Text, StyleSheet, View, SafeAreaView, Button } from "react-native";
+import {
+  Text,
+  StyleSheet,
+  View,
+  SafeAreaView,
+  Button,
+  Image,
+} from "react-native";
 import { useRouter } from "expo-router";
 import useUserStore from "../../services/stores/userStore";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -10,7 +17,9 @@ const Profile = () => {
   const resetUserStore = useUserStore((state) => state.resetUserStore);
 
   //handle profile edit
-  const handleEdit = () => {};
+  const handleEdit = () => {
+    router.push("/EditProfile");
+  };
 
   //handle posting ootd now
   const { pickImage } = useImagePicker();
@@ -68,7 +77,12 @@ const Profile = () => {
           <Text>Current: {user.streak}</Text>
           <Text>Max: {user.MaxStreak}</Text>
         </View>
-        {user.dayState === "not_posted_today" ||
+        {(user.dayState === "not_posted_today" && (
+          <View style={styles.noOOTD}>
+            <Text>you haven't posted a OOTD today.</Text>
+            <Button title="Post Now" onPress={handlePickImage}></Button>
+          </View>
+        )) ||
           (user.dayState === "streak_broken" && (
             <View style={styles.noOOTD}>
               <Text>you haven't posted a OOTD today.</Text>
@@ -104,9 +118,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   pfp: {
-    width: "20px",
-    height: "20px",
-    borderRadius: "15%",
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     borderColor: "gray",
     borderWidth: 0.5,
     backgroundColor: "blue",
@@ -114,7 +128,7 @@ const styles = StyleSheet.create({
   emptyPfp: {
     width: 50,
     height: 50,
-    borderRadius: "50%",
+    borderRadius: 25,
     borderColor: "gray",
     borderWidth: 0.5,
     backgroundColor: "gray",
@@ -139,6 +153,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    margin: 10,
   },
   statSect: {
     display: "flex",

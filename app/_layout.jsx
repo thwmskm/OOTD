@@ -8,6 +8,7 @@ import useUserStore from "../services/stores/userStore";
 import { getUser, updateUser } from "../services/userService";
 import { router } from "expo-router";
 import useStreak from "./hooks/useStreak";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function Layout() {
   const [userState, setUserState] = useState(undefined);
@@ -64,10 +65,12 @@ export default function Layout() {
   }, [userState]);
 
   return (
-    <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="(screens)" options={{ headerShown: false }} />
-    </Stack>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(screens)" options={{ headerShown: false }} />
+      </Stack>
+    </GestureHandlerRootView>
   );
 }
 const styles = StyleSheet.create({});
