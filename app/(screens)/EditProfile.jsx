@@ -46,20 +46,26 @@ const EditProfile = () => {
   };
 
   return (
-    <View style={styles.body}>
-      {user.pfp ? (
-        <Image style={styles.pfp} source={{ uri: user.pfp }}></Image>
-      ) : (
-        <View style={styles.emptyPfp}></View>
-      )}
-      <Button
-        title={saving ? "Saving..." : "Change Picture"}
-        onPress={handlePickImage}
-        disabled={saving}
-      ></Button>
-      <Pressable onPress={() => router.push("/ChangeUsername")}>
-        <Text style={styles.username}>{user.username}</Text>
-      </Pressable>
+    <View>
+      <View style={styles.topSect}>
+        {user.pfp ? (
+          <Image style={styles.pfp} source={{ uri: user.pfp }}></Image>
+        ) : (
+          <View style={styles.emptyPfp}></View>
+        )}
+        <Button
+          title={saving ? "Saving..." : "Change Picture"}
+          onPress={handlePickImage}
+          disabled={saving}
+        ></Button>
+      </View>
+
+      <View style={styles.bottomSect}>
+        <Text style={styles.label}>Username</Text>
+        <Pressable onPress={() => router.push("/ChangeUsername")}>
+          <Text style={styles.username}>{user.username}</Text>
+        </Pressable>
+      </View>
 
       <Modal visible={!!rawUri} transparent animationType="fade">
         <View style={styles.modalOverlay}>
@@ -80,9 +86,14 @@ const EditProfile = () => {
 export default EditProfile;
 
 const styles = StyleSheet.create({
-  body: {
+  topSect: {
     alignItems: "center",
     paddingTop: 40,
+    paddingBottom: 40,
+  },
+  bottomSect: {
+    paddingRight: 10,
+    paddingLeft: 10,
   },
   pfp: {
     width: 100,
@@ -100,9 +111,18 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     backgroundColor: "gray",
   },
+  label: {
+    marginLeft: 5,
+    marginBottom: 3,
+    fontSize: 12,
+    color: "gray",
+  },
   username: {
-    marginTop: 16,
     fontSize: 16,
+    padding: 10,
+    borderStyle: "solid",
+    borderWidth: 1,
+    borderRadius: 5,
   },
   modalOverlay: {
     flex: 1,
