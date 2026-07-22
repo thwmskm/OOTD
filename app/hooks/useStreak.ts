@@ -34,37 +34,38 @@ const useStreak = () => {
     return { dayState, streak, MaxStreak };
   }, [user]);
 
-  //Update the streak
   const updateStreak = useCallback(async (): Promise<void> => {
-    const now = new Date();
-    const todayString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const now = new Date();
+  const todayString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
-    const yesterday = new Date();
-    yesterday.setDate(now.getDate() - 1);
-    const yesterdayString = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
+  const yesterday = new Date();
+  yesterday.setDate(now.getDate() - 1);
+  const yesterdayString = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
 
-    const { lastPostDate, streak, MaxStreak, uid, dayState } = user;
+  const { lastPostDate, streak, MaxStreak, uid } = user;
 
-    if (lastPostDate === todayString) return;
+  if (lastPostDate === todayString) {
+    return;
+  }
 
-    let newStreak: number;
-    if (!lastPostDate)                         newStreak = 0;
-    else if (lastPostDate === yesterdayString) newStreak = streak + 1;
-    else                                       newStreak = 1;
+  let newStreak;
+  if (!lastPostDate) newStreak = 1;
+  else if (lastPostDate === yesterdayString) newStreak = streak + 1;
+  else newStreak = 1;
 
-    const updatedFields = {
-      streak: newStreak,
-      lastPostDate: todayString,
-      MaxStreak: Math.max(newStreak, MaxStreak),
-    };
+  const updatedFields = {
+    streak: newStreak,
+    lastPostDate: todayString,
+    MaxStreak: Math.max(newStreak, MaxStreak),
+  };
 
-    await updateUser(uid!, updatedFields);
+  await updateUser(uid!, updatedFields);
 
-    // sync store with updated values
-    setUser("streak", updatedFields.streak);
-    setUser("lastPostDate", updatedFields.lastPostDate);
-    setUser("MaxStreak", updatedFields.MaxStreak);
-  }, [user]);
+  setUser("streak", updatedFields.streak);
+  setUser("lastPostDate", updatedFields.lastPostDate);
+  setUser("MaxStreak", updatedFields.MaxStreak);
+
+}, [user]);
 
   //reset streak
   const resetStreak = useCallback(async (): Promise<void> => {

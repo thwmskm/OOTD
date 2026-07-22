@@ -100,7 +100,7 @@ const OOTDView = () => {
               //reset ootdStore
               resetOotdStore();
               //adjust streak accordingly
-              deleteStreak();
+              await deleteStreak();
               router.replace("/(tabs)");
             } catch (error) {
               console.error("Error deleting ootd:", error);

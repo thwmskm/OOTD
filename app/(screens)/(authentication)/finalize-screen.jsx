@@ -3,6 +3,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { FB_auth } from "../../../database/firebase";
 import { useState } from "react";
 import { createUser } from "../../../services/userService";
+import { createUserStats } from "../../../services/userStatsService";
 
 const FinalizeScreen = () => {
   const router = useRouter();
@@ -28,10 +29,22 @@ const FinalizeScreen = () => {
       createdAt: new Date(),
     };
 
+    //Create corresponding userStats instance
+    const newUserStats = {
+      uid: userId,
+      totalOOTDs: 0,
+      styleCounts: {},
+      colourCounts: {},
+      brandCounts: {},
+      itemCounts: {},
+      updatedAt: new Date(),
+    };
+
     console.log(newUser);
 
     try {
       await createUser(newUser);
+      await createUserStats(newUserStats);
     } catch (error) {
       console.error("Firestore write failed:", error.code, error.message);
     }

@@ -14,13 +14,16 @@ import { storeOOTD } from "../../services/Storage";
 import useOOTDStore from "../../services/stores/ootdStore";
 import { createOOTD } from "../../services/ootdService";
 import { getOOTD } from "../../services/ootdService";
-import { updateOOTD } from "../../services/ootdService";
 import useStreak from "../hooks/useStreak";
 import useUserStore from "../../services/stores/userStore";
 import { FontAwesome5 } from "@expo/vector-icons";
 import useWeather from "../hooks/useWeather";
 import { interpretWeatherCode } from "../../services/weatherService";
-import { updateUser } from "../../services/userService";
+import {
+  incrementTotalOOTDs,
+  incrementStatCounts,
+  incrementStatCount,
+} from "../../services/userStatsService";
 
 //Opening screen on launch
 const Home = () => {
@@ -59,7 +62,9 @@ const Home = () => {
 
   //checks and updates streak based on upload
   async function handleStreak() {
-    if (!user?.uid || !user?.email) return;
+    if (!user?.uid || !user?.email) {
+      return;
+    }
     await updateStreak();
   }
 
@@ -98,6 +103,14 @@ const Home = () => {
     try {
       await createOOTD(newOOTD);
       setOotd("imageUrl", downloadUrl);
+      if (ootd.style) {
+        await incrementStatCount(user.uid, "styleCounts", ootd.style);
+      }
+      const colourLabels = ootd.colourScheme ?? [];
+      if (colourLabels.length) {
+        await incrementStatCounts(user.uid, "colourCounts", colourLabels);
+      }
+      await incrementTotalOOTDs(user.uid);
       console.log("OOTD created");
       setOotd("saveFlag", false);
       //update user streak
