@@ -1,3 +1,4 @@
+//Ootd page for editing and viewing already posted ootd. Saves on the spot rather than routing home
 import {
   Text,
   StyleSheet,
@@ -12,7 +13,6 @@ import {
 import React, { useState, useEffect } from "react";
 import useOOTDStore from "../../services/stores/ootdStore";
 import useUserStore from "../../services/stores/userStore";
-import resetOotdStore from "../../services/stores/userStore";
 import { useRouter } from "expo-router";
 import { updateOOTD } from "../../services/ootdService";
 import { deleteOOTD } from "../../services/ootdService";
@@ -20,6 +20,11 @@ import { getOOTD } from "../../services/ootdService";
 import { FontAwesome5 } from "@expo/vector-icons";
 import useStreak from "../hooks/useStreak";
 import ColourPicker, { COLOURS } from "../components/ColourPicker";
+import {
+  incrementTotalOOTDs,
+  incrementStatCount,
+  incrementStatCounts,
+} from "../../services/userStatsService";
 
 const OOTDView = () => {
   const router = useRouter();
@@ -97,6 +102,26 @@ const OOTDView = () => {
               const id = `${user.uid}_${date}`;
               //delete ootd from db
               await deleteOOTD(id);
+
+              //decrement the ootd stats
+              await incrementTotalOOTDs(user.uid, -1);
+              if (ootd.style) {
+                await incrementStatCount(
+                  user.uid,
+                  "styleCounts",
+                  ootd.style,
+                  -1,
+                );
+              }
+              const colourLabels = ootd.colourScheme ?? [];
+              if (colourLabels.length) {
+                await incrementStatCounts(
+                  user.uid,
+                  "colourCounts",
+                  colourLabels,
+                  -1,
+                );
+              }
               //reset ootdStore
               resetOotdStore();
               //adjust streak accordingly
@@ -121,12 +146,37 @@ const OOTDView = () => {
     try {
       const id = `${user.uid}_${date}`;
       await updateOOTD(id, { caption, style, colourScheme });
+
+      //adjust styleCounts if style actually changed
+      if (ootd.style !== style) {
+        if (ootd.style) {
+          await incrementStatCount(user.uid, "styleCounts", ootd.style, -1);
+        }
+        if (style) {
+          await incrementStatCount(user.uid, "styleCounts", style, 1);
+        }
+      }
+
+      //adjust colourCounts: decrement removed colours, increment added ones
+      const oldColours = ootd.colourScheme ?? [];
+      const newColours = colourScheme ?? [];
+      const removed = oldColours.filter((c) => !newColours.includes(c));
+      const added = newColours.filter((c) => !oldColours.includes(c));
+
+      if (removed.length) {
+        await incrementStatCounts(user.uid, "colourCounts", removed, -1);
+      }
+      if (added.length) {
+        await incrementStatCounts(user.uid, "colourCounts", added, 1);
+      }
+
       setOotd("caption", caption);
       setOotd("style", style);
       setOotd("colourScheme", colourScheme);
       toggleEdit();
     } catch (error) {
-      console.log("Error while updating ootd", error);
+      console.error("Error while updating ootd", error);
+      throw error;
     }
   };
 

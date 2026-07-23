@@ -1,37 +1,24 @@
-//React Native imports
-import {
-  Text,
-  StyleSheet,
-  View,
-  SafeAreaView,
-  ScrollView,
-  Image,
-  FlatList,
-  Pressable,
-  Button,
-  Alert,
-} from "react-native";
-import React, { useState, useEffect, useCallback } from "react";
-import { Tabs, useRouter } from "expo-router";
+import { Text, StyleSheet, View, Image, Alert } from "react-native";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "expo-router";
 import { useLocalSearchParams } from "expo-router";
-
-//other file imports
 import { useImagePicker } from "../../hooks/useImagePicker";
 import useClothingStore from "../../../services/stores/clothingStore";
 import useOutfitStore from "../../../services/stores/outfitStore";
+import useUserStore from "../../../services/stores/userStore";
 import { deleteImage } from "../../../services/Storage";
 import { deleteClothing } from "../../../services/clothingService";
 import { updateClothing } from "../../../services/clothingService";
 import { deleteOutfit } from "../../../services/outfitService";
 import { updateOutfit } from "../../../services/outfitService";
 import { COLOURS } from "../../components/ColourPicker.jsx";
-
-//firebase imports
 import { db } from "../../../database/firebase";
 import { getDoc, doc } from "firebase/firestore";
-
-//misc imports
 import { FontAwesome5 } from "@expo/vector-icons";
+import {
+  incrementStatCount,
+  incrementTotalItems,
+} from "../../../services/userStatsService";
 
 const Item = () => {
   const router = useRouter();
@@ -49,6 +36,9 @@ const Item = () => {
   const outfit = useOutfitStore((state) => state.outfit);
   const loadOutfit = useOutfitStore((state) => state.loadOutfit);
   const resetOutfitStore = useOutfitStore((state) => state.resetOutfitStore);
+
+  //userStore initialization
+  const user = useUserStore((state) => state.user);
 
   //Find and load data for item into clothing/outfit store
   useEffect(() => {
@@ -105,6 +95,17 @@ const Item = () => {
                 await deleteImage(path);
                 await deleteClothing(clothing.cid);
 
+                //decrement clothing stats
+                if (clothing.brand) {
+                  await incrementStatCount(
+                    user.uid,
+                    "brandCounts",
+                    clothing.brand,
+                    -1,
+                  );
+                }
+                await incrementTotalItems(user.uid, -1);
+
                 resetClothingStore();
                 router.back();
               } else {
@@ -117,7 +118,7 @@ const Item = () => {
                 router.back();
               }
             } catch (error) {
-              console.log("Failed to delete file!", error);
+              console.error("Failed to delete file!", error);
             }
           },
         },
@@ -141,7 +142,7 @@ const Item = () => {
         // Update ClothingStore and Firestore
         const updatedClothing = { ...clothing, imageUrl: downloadUrl };
         loadClothing(updatedClothing);
-        await updateClothing(updatedClothing);
+        await updateClothing(clothing.cid, { imageUrl: downloadUrl });
       } catch (error) {
         console.log(`Failed to update ${type} image`, error);
       }
@@ -156,7 +157,7 @@ const Item = () => {
         // Update OutfitStore and Firestore
         const updatedOutfit = { ...outfit, imageUrl: downloadUrl };
         loadOutfit(updatedOutfit);
-        await updateOutfit(updatedOutfit);
+        await updateOutfit(outfit.oid, { imageUrl: downloadUrl });
       } catch (error) {
         console.log(`Failed to update ${type} image`, error);
       }

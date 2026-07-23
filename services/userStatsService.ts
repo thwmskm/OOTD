@@ -82,6 +82,21 @@ export const incrementTotalOOTDs = async (uid: string, delta: number = 1) => {
   }
 };
 
+//Atomically increment the total number of clothing items uploaded to the closet
+export const incrementTotalItems = async (uid: string, delta: number = 1) => {
+  try {
+    const userStatsRef = doc(db, "userStats", uid);
+    await updateDoc(userStatsRef, {
+      totalItems: increment(delta),
+      updatedAt: new Date(),
+    });
+    console.log("totalItems increment success!");
+  } catch (error) {
+    console.error("Error incrementing totalItems: ", error);
+    throw error;
+  }
+};
+
 //Atomically increment a single key within one of the count maps
 //field: "styleCounts" | "colourCounts" | "brandCounts" | "itemCounts"
 //key: the specific label/id within that map, e.g. "casual" or a colour label

@@ -1,6 +1,7 @@
 export interface UserStats {
     uid: string;
     totalOOTDs: number;                         //ootd
+    totalItems: number;                        //clothingItems
     styleCounts?: Record<string, number>;      //ootd     
     colourCounts?: Record<string, number>;     //ootd
     brandCounts?: Record<string, number>;      //clothingItem

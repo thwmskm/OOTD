@@ -22,6 +22,10 @@ import useUserStore from "../../../services/stores/userStore";
 import { storeClothingItem } from "../../../services/Storage";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { COLOURS } from "../../components/ColourPicker.jsx";
+import {
+  incrementStatCount,
+  incrementTotalItems,
+} from "../../../services/userStatsService.ts";
 
 /*-------------------------------------------------------------------------------------------*/
 const EditClothing = () => {
@@ -38,10 +42,11 @@ const EditClothing = () => {
     (state) => state.resetClothingStore,
   );
 
-  //outfitStore
-
   //keeping track of image loading status
   const [loadStatus, setLoadStatus] = useState(true);
+
+  //track original brand so save() can diff against it for stat adjustments
+  const [originalBrand, setOriginalBrand] = useState(null);
 
   //Reset clothingStore, setimageUrl, and load preexisting clothing (if exists)
   useEffect(() => {
@@ -49,16 +54,15 @@ const EditClothing = () => {
       setLoadStatus(true);
       resetClothingStore();
       try {
-        //if preexisting clothing
         if (cid) {
           const snap = await getDoc(doc(db, "clothings", cid));
           if (snap.exists()) {
             const data = snap.data();
             loadClothing(data);
+            setOriginalBrand(data.brand ?? null); //capture before edits happen
           } else {
             console.log("No clothing found with cid:", cid);
           }
-          //if new clothing
         } else if (imageUrl) {
           setClothing("imageUrl", imageUrl);
         }
@@ -75,20 +79,39 @@ const EditClothing = () => {
   const save = async () => {
     if (!user) return;
     if (clothing.cid) {
-      //update exisiting clothing
+      //update existing clothing
       try {
         await updateClothing(clothing.cid, clothing);
-      } catch {
+
+        //adjust brandCounts only if brand actually changed
+        if (originalBrand !== clothing.brand) {
+          if (originalBrand) {
+            await incrementStatCount(
+              user.uid,
+              "brandCounts",
+              originalBrand,
+              -1,
+            );
+          }
+          if (clothing.brand) {
+            await incrementStatCount(
+              user.uid,
+              "brandCounts",
+              clothing.brand,
+              1,
+            );
+          }
+        }
+      } catch (error) {
         console.error("Error trying to update clothing", error);
+        throw error;
       }
       router.back();
     } else {
       //generate new cid
       const newCid = uuid.v4().toString();
-      //obtain downaloadUrl and store image in firebase storage
       const downloadUrl = await storeClothingItem(imageUrl, newCid, user.uid);
       console.log("image uploaded");
-      //create new clothing item
       const newClothing = {
         cid: newCid,
         uid: user.uid,
@@ -104,8 +127,12 @@ const EditClothing = () => {
       };
       console.log(newClothing);
       try {
-        console.log("clothing created");
         await createClothing(newClothing);
+        console.log("clothing created");
+        if (clothing.brand) {
+          await incrementStatCount(user.uid, "brandCounts", clothing.brand);
+        }
+        await incrementTotalItems(user.uid);
       } catch (error) {
         console.error("Error trying to create clothing", error);
         throw error;

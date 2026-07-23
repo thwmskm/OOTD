@@ -1,3 +1,4 @@
+//ootd creation page for uploading ootd. Sets the ootdStore so it can save on /home
 import {
   Text,
   StyleSheet,

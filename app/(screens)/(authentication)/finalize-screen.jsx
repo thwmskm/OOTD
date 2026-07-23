@@ -33,6 +33,7 @@ const FinalizeScreen = () => {
     const newUserStats = {
       uid: userId,
       totalOOTDs: 0,
+      totalItems: 0,
       styleCounts: {},
       colourCounts: {},
       brandCounts: {},

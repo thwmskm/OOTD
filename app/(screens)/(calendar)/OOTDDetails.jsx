@@ -20,7 +20,6 @@ const OOTDDetails = () => {
   const [loading, setLoading] = useState(false);
 
   //useStates for the ootd details
-  const [likes, setLikes] = useState(undefined);
   const [saves, setSaves] = useState(undefined);
   const [caption, setCaption] = useState(undefined);
   const [weather, setWeather] = useState(undefined);
@@ -36,7 +35,6 @@ const OOTDDetails = () => {
       try {
         const snap = await getOOTD(id);
         if (snap) {
-          setLikes(snap.likes);
           setSaves(snap.saves);
           setCaption(snap.caption);
           setImage(snap.imageUrl);
@@ -64,7 +62,6 @@ const OOTDDetails = () => {
           </View>
 
           <View>
-            <Text>Likes: {likes}</Text>
             <Text>Saves: {saves}</Text>
             {weather !== undefined && (
               <Text>
