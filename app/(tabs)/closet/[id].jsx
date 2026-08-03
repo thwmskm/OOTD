@@ -46,7 +46,6 @@ const Item = () => {
       if (type === "clothing") {
         const docRef = doc(db, "clothings", id);
         const docSnap = await getDoc(docRef);
-        console.log("Doc exists:", docSnap.exists());
         if (docSnap.exists()) {
           setItem(docSnap.data());
           //Load item to ClothingStore
@@ -55,7 +54,6 @@ const Item = () => {
       } else {
         const docRef = doc(db, "outfits", id);
         const docSnap = await getDoc(docRef);
-        console.log("Doc exists:", docSnap.exists());
         if (docSnap.exists()) {
           setItem(docSnap.data());
           //Load item to OutfitStore

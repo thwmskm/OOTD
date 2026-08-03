@@ -13,11 +13,14 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { useImagePicker } from "../../hooks/useImagePicker";
+import useClosetFilter from "../../hooks/useClosetFilter";
+import useClosetSort from "../../hooks/useClosetSort";
 import useUserStore from "../../../services/stores/userStore";
 import { db } from "../../../database/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import GridView from "../../components/GridView.jsx";
 import FloatButton from "./FloatButton";
+import ClosetFilterBar from "./ClosetFilterBar";
 
 const ClosetIndex = () => {
   const router = useRouter();
@@ -27,6 +30,10 @@ const ClosetIndex = () => {
 
   //userStore initialization
   const user = useUserStore((state) => state.user);
+
+  //filter + sort, applied to clothingItems only (outfit tab untouched for now)
+  const filter = useClosetFilter(clothingItems);
+  const sort = useClosetSort(filter.filteredItems);
 
   //FUNCTION TO CALL THE CLOTHINGS FROM THE CLOSET AND DISPLAY FOR USER
   const fetchClothings = async () => {
@@ -128,10 +135,13 @@ const ClosetIndex = () => {
             <Text>Outfits</Text>
           </Pressable>
         </View>
+
+        {tabs === "clothing" && <ClosetFilterBar filter={filter} sort={sort} />}
+
         <FloatButton onCreate={handlePickClothing}></FloatButton>
         <GridView
           tab={tabs}
-          items={tabs === "clothing" ? clothingItems : outfitItems}
+          items={tabs === "clothing" ? sort.sortedItems : outfitItems}
           onItemPress={handleItemPress}
         ></GridView>
       </View>
@@ -143,7 +153,7 @@ export default ClosetIndex;
 
 const styles = StyleSheet.create({
   header: {
-    height: "15%",
+    height: "5%",
   },
   div: {
     flex: 1,
