@@ -4,19 +4,18 @@ import { FB_auth } from "../../../database/firebase";
 import { useState } from "react";
 import { createUser } from "../../../services/userService";
 import { createUserStats } from "../../../services/userStatsService";
+import { storePfp } from "../../../services/Storage";
+import useUserStore from "../../../services/stores/userStore"; // ← add
 
 const FinalizeScreen = () => {
   const router = useRouter();
   const { username, pfp } = useLocalSearchParams();
+  const loadUser = useUserStore((state) => state.loadUser); // ← add
 
-  //Create new User and save to db. Then, continue to homepage.
   const CreateAndContinue = async () => {
     const userId = FB_auth.currentUser.uid;
+    const downloadUrl = pfp ? await storePfp(pfp, userId) : "";
 
-    //Obtain and store pfp in firebase storage
-    const downloadUrl = storePfp(pfp, userId);
-
-    //Create new user instance
     const newUser = {
       uid: userId,
       email: FB_auth.currentUser.email,
@@ -29,25 +28,22 @@ const FinalizeScreen = () => {
       createdAt: new Date(),
     };
 
-    //Create corresponding userStats instance
-    const newUserStats = {
-      uid: userId,
-      totalOOTDs: 0,
-      totalItems: 0,
-      styleCounts: {},
-      colourCounts: {},
-      brandCounts: {},
-      itemCounts: {},
-      updatedAt: new Date(),
-    };
-
-    console.log(newUser);
-
     try {
       await createUser(newUser);
-      await createUserStats(newUserStats);
+      await createUserStats({
+        uid: userId,
+        totalOOTDs: 0,
+        totalItems: 0,
+        styleCounts: {},
+        colourCounts: {},
+        brandCounts: {},
+        itemCounts: {},
+        updatedAt: new Date(),
+      });
+      loadUser(newUser); // ← populate store immediately, don't wait on the listener
     } catch (error) {
       console.error("Firestore write failed:", error.code, error.message);
+      return; // ← don't navigate forward on failure, store/doc would be out of sync
     }
     router.replace("/(tabs)");
   };

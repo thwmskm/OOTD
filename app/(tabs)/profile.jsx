@@ -1,11 +1,5 @@
-import {
-  Text,
-  StyleSheet,
-  View,
-  SafeAreaView,
-  Button,
-  Image,
-} from "react-native";
+import { Text, StyleSheet, View, Button, Image } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import useUserStore from "../../services/stores/userStore";
 import { FontAwesome5 } from "@expo/vector-icons";

@@ -1,4 +1,5 @@
-import { Text, StyleSheet, View, SafeAreaView } from "react-native";
+import { Text, StyleSheet, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Social = () => {
   return (

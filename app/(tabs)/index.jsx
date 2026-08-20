@@ -1,12 +1,5 @@
-import {
-  Text,
-  StyleSheet,
-  View,
-  SafeAreaView,
-  Image,
-  Button,
-  Pressable,
-} from "react-native";
+import { Text, StyleSheet, View, Image, Button, Pressable } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useCallback } from "react";
 import { useImagePicker } from "../hooks/useImagePicker";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -24,6 +17,7 @@ import {
   incrementStatCounts,
   incrementStatCount,
 } from "../../services/userStatsService";
+import { FB_auth } from "../../database/firebase";
 
 //Opening screen on launch
 const Home = () => {
@@ -51,11 +45,13 @@ const Home = () => {
     ? interpretWeatherCode(current.weatherCode)
     : { emoji: "—", label: "" };
 
-  //trigger saveOOTD on remount if ootdStore saveFlag is true (only on initial save from EdtiOOTD)
+  //trigger saveOOTD on remount if ootdStore saveFlag is true (only on initial save from EditOOTD)
   useFocusEffect(
     useCallback(() => {
       if (ootd.saveFlag) {
-        saveOOTD(ootd.imageUrl);
+        saveOOTD(ootd.imageUrl).catch((error) => {
+          console.error("Failed to sync OOTD on focus:", error);
+        });
       }
     }, [ootd.saveFlag]),
   );
@@ -103,6 +99,7 @@ const Home = () => {
     try {
       await createOOTD(newOOTD);
       setOotd("imageUrl", downloadUrl);
+
       if (ootd.style) {
         await incrementStatCount(user.uid, "styleCounts", ootd.style);
       }
@@ -111,6 +108,7 @@ const Home = () => {
         await incrementStatCounts(user.uid, "colourCounts", colourLabels);
       }
       await incrementTotalOOTDs(user.uid);
+
       console.log("OOTD created");
       setOotd("saveFlag", false);
       //update user streak

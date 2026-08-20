@@ -2,13 +2,13 @@ import {
   Text,
   StyleSheet,
   View,
-  SafeAreaView,
   ScrollView,
   Image,
   FlatList,
   Pressable,
   Button,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
