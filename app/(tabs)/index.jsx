@@ -1,4 +1,4 @@
-import { Text, StyleSheet, View, Image, Button, Pressable } from "react-native";
+import { StyleSheet, View, Image, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useCallback } from "react";
 import { useImagePicker } from "../hooks/useImagePicker";
@@ -6,10 +6,8 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { storeOOTD } from "../../services/Storage";
 import useOOTDStore from "../../services/stores/ootdStore";
 import { createOOTD } from "../../services/ootdService";
-import { getOOTD } from "../../services/ootdService";
 import useStreak from "../hooks/useStreak";
 import useUserStore from "../../services/stores/userStore";
-import { FontAwesome5 } from "@expo/vector-icons";
 import useWeather from "../hooks/useWeather";
 import { interpretWeatherCode } from "../../services/weatherService";
 import {
@@ -17,33 +15,33 @@ import {
   incrementStatCounts,
   incrementStatCount,
 } from "../../services/userStatsService";
-import { FB_auth } from "../../database/firebase";
+import AppText from "../components/AppText";
+import AppButton from "../components/AppButton";
+import { colors, spacing, radius } from "../../constants/theme";
 
-//Opening screen on launch
 const Home = () => {
   const router = useRouter();
 
-  //create date of upload (YYY-MM-DD)
   const now = new Date();
   const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const dateLabel = now
+    .toLocaleDateString("en-US", { month: "short", day: "numeric" })
+    .toUpperCase();
 
   //userStore initialization
   const user = useUserStore((state) => state.user);
-
-  //initialize useStreak hook
-  const { updateStreak } = useStreak(user?.uid ?? "");
+  const { updateStreak } = useStreak();
 
   //ootdStore initialization
   const ootd = useOOTDStore((state) => state.ootd);
   const setOotd = useOOTDStore((state) => state.setOotd);
-  const resetOotdStore = useOOTDStore((state) => state.resetOotdStore);
 
   //weather api
   const { forecast, isLoading } = useWeather();
   const current = forecast?.current;
-  const { emoji, label } = current
+  const { emoji } = current
     ? interpretWeatherCode(current.weatherCode)
-    : { emoji: "—", label: "" };
+    : { emoji: "—" };
 
   //trigger saveOOTD on remount if ootdStore saveFlag is true (only on initial save from EditOOTD)
   useFocusEffect(
@@ -56,31 +54,21 @@ const Home = () => {
     }, [ootd.saveFlag]),
   );
 
-  //checks and updates streak based on upload
   async function handleStreak() {
-    if (!user?.uid || !user?.email) {
-      return;
-    }
+    if (!user?.uid || !user?.email) return;
     await updateStreak();
   }
 
-  //handle logic for when user taps on the ootd post
   function handleOOTDView() {
     router.push("/OOTDView");
   }
 
-  //save ootd to storage and db on imageUpload complete
   async function saveOOTD(url) {
     if (!user) return;
 
-    //generate new ootd id (user id_date)
     const newId = `${user.uid}_${date}`;
-
-    //obtain downaloadUrl and store image in firebase storage
     const downloadUrl = await storeOOTD(url, newId, user.uid);
-    console.log("OOTD uploaded");
 
-    //Create new ootd instance
     const newOOTD = {
       id: newId,
       uid: user.uid,
@@ -94,7 +82,6 @@ const Home = () => {
       caption: ootd.caption,
       createdAt: new Date(),
     };
-    console.log(newOOTD);
 
     try {
       await createOOTD(newOOTD);
@@ -109,9 +96,7 @@ const Home = () => {
       }
       await incrementTotalOOTDs(user.uid);
 
-      console.log("OOTD created");
       setOotd("saveFlag", false);
-      //update user streak
       await handleStreak();
     } catch (error) {
       console.error("Error trying to create ootd", error);
@@ -119,68 +104,93 @@ const Home = () => {
     }
   }
 
-  //handling ootd upload
   const { pickImage } = useImagePicker();
   const handlePickImage = () => {
     pickImage((uri) => {
       router.push({
         pathname: "/EditOOTD",
-        params: {
-          imageUrl: uri,
-        },
+        params: { imageUrl: uri },
       });
     });
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <View style={styles.header}>
-        <Text>YU*YL</Text>
-        {!user ? <Text>--</Text> : <Text>{user.streak}</Text>}
-        <Button
-          title="week"
-          onPress={() => {
-            router.push("/WeeklyStrip");
-          }}
-        ></Button>
-      </View>
-      <View style={styles.body}>
-        <Text>{date}</Text>
-        <View>
-          {isLoading ? (
-            <Text>Loading weather...</Text>
-          ) : forecast?.current ? (
-            <View>
-              <Text>
-                {interpretWeatherCode(forecast.current.weatherCode).emoji}{" "}
-                {forecast.current.temp}°C
-              </Text>
-            </View>
-          ) : (
-            <Text>Weather unavailable</Text>
-          )}
+        <View style={styles.headerLeft}>
+          <AppText weight="bold" style={styles.logo}>
+            YU
+            <AppText weight="bold" style={styles.logoAccent}>
+              *
+            </AppText>
+            YL
+          </AppText>
         </View>
-        <View>
-          {!ootd.imageUrl ? (
-            <Button
-              title="Upload YUYL"
+
+        <View style={styles.headerRight}>
+          <Pressable onPress={() => router.push("/WeeklyStrip")}>
+            <AppText weight="medium" style={styles.weekLink}>
+              Week
+            </AppText>
+          </Pressable>
+        </View>
+
+        <View style={styles.streakWrap} pointerEvents="none">
+          <AppText weight="medium" style={styles.streakValue}>
+            {user?.streak ?? "--"}
+          </AppText>
+        </View>
+      </View>
+
+      <View style={styles.body}>
+        {!ootd.imageUrl ? (
+          <View style={styles.emptyState}>
+            <AppText style={styles.emptyText}>
+              {isLoading
+                ? "Checking today's weather..."
+                : current
+                  ? `${emoji}  ${current.temp}°C right now`
+                  : "No post yet today"}
+            </AppText>
+            <AppButton
+              title="Document today's fit"
               onPress={handlePickImage}
               disabled={isLoading}
-            ></Button>
-          ) : (
-            <View style={styles.postArea}>
-              <Pressable onPress={handleOOTDView}>
-                <Image
-                  source={{ uri: ootd.imageUrl }}
-                  style={styles.ootdImage}
-                ></Image>
-              </Pressable>
-              <View>
-                <Text>{ootd.caption}</Text>
+              style={styles.uploadBtn}
+            />
+          </View>
+        ) : (
+          <Pressable onPress={handleOOTDView} style={styles.frame}>
+            <Image
+              source={{ uri: ootd.imageUrl }}
+              style={styles.ootdImage}
+              resizeMode="fill"
+            />
+
+            {/* top overlay: date + weather */}
+            <View style={styles.topOverlayRow}>
+              <View style={styles.pill}>
+                <AppText weight="medium" style={styles.pillText}>
+                  {dateLabel}
+                </AppText>
+              </View>
+              <View style={styles.pill}>
+                <AppText weight="medium" style={styles.pillText}>
+                  {isLoading ? "—" : `${emoji} ${current?.temp ?? "--"}°`}
+                </AppText>
               </View>
             </View>
-          )}
-        </View>
+
+            {/* bottom overlay: caption */}
+            {ootd.caption ? (
+              <View style={styles.bottomScrim}>
+                <AppText weight="regular" style={styles.captionText}>
+                  {ootd.caption}
+                </AppText>
+              </View>
+            ) : null}
+          </Pressable>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -189,22 +199,115 @@ const Home = () => {
 export default Home;
 
 const styles = StyleSheet.create({
-  body: {
-    margin: "auto",
-  },
   safeArea: {
     flex: 1,
+    backgroundColor: colors.paper,
   },
   header: {
-    height: "15%",
-    display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 10,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    position: "relative",
+  },
+  headerLeft: {
+    alignItems: "flex-start",
+  },
+  headerRight: {
+    alignItems: "flex-end",
+  },
+  streakWrap: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  streakValue: {
+    fontSize: 13,
+    color: colors.ink,
+  },
+  logo: {
+    fontSize: 18,
+    color: colors.ink,
+    letterSpacing: 0.5,
+  },
+  logoAccent: {
+    fontSize: 18,
+    color: colors.sage,
+  },
+  weekLink: {
+    fontSize: 13,
+    color: colors.textMuted,
+  },
+  body: {
+    flex: 1,
+    alignItems: "center",
+  },
+  frame: {
+    flex: 1,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+    borderBottomLeftRadius: radius.lg,
+    borderBottomRightRadius: radius.lg,
+    overflow: "hidden",
+    width: "95%",
+    backgroundColor: colors.surface,
+    position: "relative",
   },
   ootdImage: {
-    width: 300,
-    height: 400,
+    width: "100%",
+    height: "100%",
+  },
+  topOverlayRow: {
+    position: "absolute",
+    top: spacing.md,
+    left: spacing.md,
+    right: spacing.md,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  pill: {
+    backgroundColor: "rgba(43, 42, 40, 0.55)", // ink at low opacity — works over any photo
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+  },
+  pillText: {
+    fontSize: 12,
+    color: colors.paper,
+    letterSpacing: 0.5,
+  },
+  bottomScrim: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.md,
+    backgroundColor: "rgba(43, 42, 40, 0.35)",
+  },
+  captionText: {
+    fontSize: 14,
+    color: colors.paper,
+    textAlign: "left",
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.md,
+    paddingHorizontal: spacing.lg,
+  },
+  emptyText: {
+    fontSize: 13,
+    color: colors.textMuted,
+  },
+  uploadBtn: {
+    minWidth: 220,
   },
 });

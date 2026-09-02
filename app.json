@@ -52,6 +52,12 @@
           "savePhotosPermission": "Allow YU*YL to save your weekly strip to your camera roll.",
           "isAccessMediaLocationEnabled": false
         }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FAF7F1"
+        }
       ]
     ]
   }

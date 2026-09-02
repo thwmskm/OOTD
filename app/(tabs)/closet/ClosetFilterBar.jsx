@@ -5,22 +5,14 @@
 import React, { useState } from "react";
 import {
   View,
-  Text,
   Pressable,
   ScrollView,
   TextInput,
   StyleSheet,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
-
-//design tokens -- dark brutalist editorial
-const COLORS = {
-  bg: "#0e0e0e",
-  text: "#f0ece4",
-  accent: "#C8F135",
-  border: "#f0ece4",
-  dim: "#6b6b66",
-};
+import AppText from "../../components/AppText";
+import { colors, spacing, radius } from "../../../constants/theme";
 
 const CATEGORIES = [
   { key: "colour", label: "Colour" },
@@ -32,10 +24,8 @@ const CATEGORIES = [
 ];
 
 const ClosetFilterBar = ({ filter, sort }) => {
-  //which popover is currently open: null | "colour" | "type" | ... | "sort"
   const [activePopover, setActivePopover] = useState(null);
 
-  //map each category key to its data + handlers from useClosetFilter's return
   const categoryConfig = {
     colour: {
       available: filter.availableColours,
@@ -83,9 +73,10 @@ const ClosetFilterBar = ({ filter, sort }) => {
     setActivePopover((prev) => (prev === key ? null : key));
   };
 
-  const activeCategory = activePopover && activePopover !== "sort"
-    ? categoryConfig[activePopover]
-    : null;
+  const activeCategory =
+    activePopover && activePopover !== "sort"
+      ? categoryConfig[activePopover]
+      : null;
 
   return (
     <View style={styles.wrapper}>
@@ -108,8 +99,8 @@ const ClosetFilterBar = ({ filter, sort }) => {
                   (isActive || hasSelections) && styles.pillActive,
                 ]}
               >
-                {hasSelections && <View style={styles.cornerTick} />}
-                <Text
+                <AppText
+                  weight="medium"
                   style={[
                     styles.pillText,
                     (isActive || hasSelections) && styles.pillTextActive,
@@ -117,7 +108,7 @@ const ClosetFilterBar = ({ filter, sort }) => {
                 >
                   {cat.label}
                   {hasSelections ? ` (${config.count})` : ""}
-                </Text>
+                </AppText>
               </Pressable>
             );
           })}
@@ -130,7 +121,9 @@ const ClosetFilterBar = ({ filter, sort }) => {
               }}
               style={styles.clearPill}
             >
-              <Text style={styles.clearPillText}>Clear</Text>
+              <AppText weight="medium" style={styles.clearPillText}>
+                Clear
+              </AppText>
             </Pressable>
           )}
         </ScrollView>
@@ -144,15 +137,14 @@ const ClosetFilterBar = ({ filter, sort }) => {
         >
           <FontAwesome5
             name="sliders-h"
-            size={16}
-            color={activePopover === "sort" ? COLORS.bg : COLORS.text}
+            size={14}
+            color={activePopover === "sort" ? colors.paper : colors.ink}
           />
         </Pressable>
       </View>
 
       {activePopover && (
         <>
-          {/* tap-outside mask to dismiss */}
           <Pressable
             style={styles.mask}
             onPress={() => setActivePopover(null)}
@@ -161,7 +153,9 @@ const ClosetFilterBar = ({ filter, sort }) => {
           <View style={styles.popover}>
             {activePopover === "sort" ? (
               <>
-                <Text style={styles.popoverTitle}>Sort By</Text>
+                <AppText weight="medium" style={styles.popoverTitle}>
+                  Sort by
+                </AppText>
                 {sort.sortOptions.map((option) => {
                   const isSelected = sort.sortBy === option.value;
                   return (
@@ -173,19 +167,20 @@ const ClosetFilterBar = ({ filter, sort }) => {
                       }}
                       style={styles.sortOption}
                     >
-                      <Text
+                      <AppText
+                        weight="regular"
                         style={[
                           styles.sortOptionText,
                           isSelected && styles.sortOptionTextActive,
                         ]}
                       >
                         {option.label}
-                      </Text>
+                      </AppText>
                       {isSelected && (
                         <FontAwesome5
                           name="check"
                           size={12}
-                          color={COLORS.accent}
+                          color={colors.sage}
                         />
                       )}
                     </Pressable>
@@ -194,26 +189,29 @@ const ClosetFilterBar = ({ filter, sort }) => {
               </>
             ) : (
               <>
-                <Text style={styles.popoverTitle}>
+                <AppText weight="medium" style={styles.popoverTitle}>
                   {CATEGORIES.find((c) => c.key === activePopover)?.label}
-                </Text>
+                </AppText>
 
                 {activeCategory.query !== undefined && (
                   <TextInput
                     value={activeCategory.query}
                     onChangeText={activeCategory.setQuery}
                     placeholder={`Search ${activePopover}...`}
-                    placeholderTextColor={COLORS.dim}
+                    placeholderTextColor={colors.textMuted}
                     style={styles.searchInput}
                   />
                 )}
 
                 <View style={styles.chipWrap}>
                   {activeCategory.available.length === 0 ? (
-                    <Text style={styles.emptyText}>No matches</Text>
+                    <AppText weight="regular" style={styles.emptyText}>
+                      No matches
+                    </AppText>
                   ) : (
                     activeCategory.available.map((value) => {
-                      const isSelected = activeCategory.selected.includes(value);
+                      const isSelected =
+                        activeCategory.selected.includes(value);
                       return (
                         <Pressable
                           key={value}
@@ -223,14 +221,15 @@ const ClosetFilterBar = ({ filter, sort }) => {
                             isSelected && styles.chipSelected,
                           ]}
                         >
-                          <Text
+                          <AppText
+                            weight="medium"
                             style={[
                               styles.chipText,
                               isSelected && styles.chipTextSelected,
                             ]}
                           >
                             {value}
-                          </Text>
+                          </AppText>
                         </Pressable>
                       );
                     })
@@ -255,71 +254,49 @@ const styles = StyleSheet.create({
   barRow: {
     flexDirection: "row",
     alignItems: "center",
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: COLORS.border,
-    backgroundColor: COLORS.bg,
+    backgroundColor: colors.paper,
   },
   pillRow: {
     flexDirection: "row",
-    paddingVertical: 10,
-    paddingLeft: 12,
-    gap: 8,
+    paddingVertical: spacing.sm,
+    paddingLeft: spacing.md,
+    gap: spacing.xs + 2,
     alignItems: "center",
   },
   pill: {
-    position: "relative",
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 0,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
     paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingHorizontal: spacing.sm + 2,
   },
   pillActive: {
-    backgroundColor: COLORS.accent,
-    borderColor: COLORS.accent,
+    backgroundColor: colors.sage,
   },
   pillText: {
-    fontFamily: "SpaceGrotesk",
     fontSize: 12,
-    letterSpacing: 0.5,
-    textTransform: "uppercase",
-    color: COLORS.text,
+    color: colors.ink,
   },
   pillTextActive: {
-    color: COLORS.bg,
-  },
-  cornerTick: {
-    position: "absolute",
-    top: -1,
-    right: -1,
-    width: 6,
-    height: 6,
-    borderTopWidth: 2,
-    borderRightWidth: 2,
-    borderColor: COLORS.accent,
+    color: colors.paper,
   },
   clearPill: {
     paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingHorizontal: spacing.sm,
   },
   clearPillText: {
-    fontFamily: "SpaceGrotesk",
     fontSize: 12,
-    letterSpacing: 0.5,
-    textTransform: "uppercase",
-    color: COLORS.dim,
+    color: colors.textMuted,
     textDecorationLine: "underline",
   },
   sortBtn: {
-    borderLeftWidth: 1,
-    borderColor: COLORS.border,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    marginLeft: spacing.xs,
+    borderRadius: radius.md,
   },
   mask: {
     position: "absolute",
-    top: 41,
+    top: 44,
     left: 0,
     right: 0,
     height: 1000,
@@ -327,78 +304,78 @@ const styles = StyleSheet.create({
   },
   popover: {
     position: "absolute",
-    top: 42,
-    left: 0,
-    right: 0,
-    backgroundColor: COLORS.bg,
+    top: 46,
+    left: spacing.md,
+    right: spacing.md,
+    backgroundColor: colors.paper,
+    borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    borderTopWidth: 0,
-    padding: 14,
+    borderColor: colors.line,
+    padding: spacing.md,
     zIndex: 22,
-    maxHeight: 260,
+    maxHeight: 280,
+    // soft shadow — reads as a lifted card rather than a hard-bordered panel
+    shadowColor: colors.ink,
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
   },
   popoverTitle: {
-    fontFamily: "SpaceGrotesk",
-    fontSize: 12,
+    fontSize: 11,
     letterSpacing: 1,
-    textTransform: "uppercase",
-    color: COLORS.dim,
-    marginBottom: 10,
+    color: colors.textMuted,
+    marginBottom: spacing.sm,
   },
   searchInput: {
     borderWidth: 1,
-    borderColor: COLORS.border,
-    color: COLORS.text,
-    fontFamily: "SpaceGrotesk",
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    marginBottom: 10,
+    borderColor: colors.line,
+    borderRadius: radius.sm,
+    color: colors.ink,
+    fontFamily: "Pretendard_Regular",
+    fontSize: 13,
+    paddingVertical: spacing.xs + 2,
+    paddingHorizontal: spacing.sm,
+    marginBottom: spacing.sm,
   },
   chipWrap: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    gap: spacing.xs + 2,
   },
   chip: {
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
     paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingHorizontal: spacing.sm + 2,
   },
   chipSelected: {
-    backgroundColor: COLORS.accent,
-    borderColor: COLORS.accent,
+    backgroundColor: colors.sage,
   },
   chipText: {
-    fontFamily: "SpaceGrotesk",
     fontSize: 12,
-    textTransform: "uppercase",
-    color: COLORS.text,
+    color: colors.ink,
   },
   chipTextSelected: {
-    color: COLORS.bg,
+    color: colors.paper,
   },
   emptyText: {
-    fontFamily: "SpaceGrotesk",
     fontSize: 12,
-    color: COLORS.dim,
+    color: colors.textMuted,
   },
   sortOption: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 10,
+    paddingVertical: spacing.sm + 2,
     borderBottomWidth: 1,
-    borderColor: "#1c1c1c",
+    borderColor: colors.surface,
   },
   sortOptionText: {
-    fontFamily: "SpaceGrotesk",
     fontSize: 13,
-    textTransform: "uppercase",
-    color: COLORS.text,
+    color: colors.ink,
   },
   sortOptionTextActive: {
-    color: COLORS.accent,
+    color: colors.sage,
   },
 });

@@ -1,16 +1,21 @@
-import { Text, StyleSheet, View, Image, Alert } from "react-native";
+import { StyleSheet, View, Image, Pressable, Alert } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useState, useEffect } from "react";
-import { useRouter } from "expo-router";
-import { useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { useImagePicker } from "../../hooks/useImagePicker";
 import useClothingStore from "../../../services/stores/clothingStore";
 import useOutfitStore from "../../../services/stores/outfitStore";
 import useUserStore from "../../../services/stores/userStore";
-import { deleteImage } from "../../../services/Storage";
-import { deleteClothing } from "../../../services/clothingService";
-import { updateClothing } from "../../../services/clothingService";
-import { deleteOutfit } from "../../../services/outfitService";
-import { updateOutfit } from "../../../services/outfitService";
+import {
+  deleteImage,
+  storeClothingItem,
+  storeOutfitItem,
+} from "../../../services/Storage";
+import {
+  deleteClothing,
+  updateClothing,
+} from "../../../services/clothingService";
+import { deleteOutfit, updateOutfit } from "../../../services/outfitService";
 import { COLOURS } from "../../components/ColourPicker.jsx";
 import { db } from "../../../database/firebase";
 import { getDoc, doc } from "firebase/firestore";
@@ -19,28 +24,27 @@ import {
   incrementStatCount,
   incrementTotalItems,
 } from "../../../services/userStatsService";
+import AppText from "../../components/AppText";
+import AttributeRow from "../../components/AttributeRow";
+import { colors, spacing, radius } from "../../../constants/theme";
 
 const Item = () => {
   const router = useRouter();
   const { id, type } = useLocalSearchParams();
   const [item, setItem] = useState(null);
 
-  //clothing Attributes setters
   const clothing = useClothingStore((state) => state.clothing);
   const loadClothing = useClothingStore((state) => state.loadClothing);
   const resetClothingStore = useClothingStore(
     (state) => state.resetClothingStore,
   );
 
-  //outfit Attributes setters
   const outfit = useOutfitStore((state) => state.outfit);
   const loadOutfit = useOutfitStore((state) => state.loadOutfit);
   const resetOutfitStore = useOutfitStore((state) => state.resetOutfitStore);
 
-  //userStore initialization
   const user = useUserStore((state) => state.user);
 
-  //Find and load data for item into clothing/outfit store
   useEffect(() => {
     const fetchItem = async () => {
       if (type === "clothing") {
@@ -48,7 +52,6 @@ const Item = () => {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           setItem(docSnap.data());
-          //Load item to ClothingStore
           loadClothing(docSnap.data());
         }
       } else {
@@ -56,7 +59,6 @@ const Item = () => {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           setItem(docSnap.data());
-          //Load item to OutfitStore
           loadOutfit(docSnap.data());
         }
       }
@@ -64,21 +66,15 @@ const Item = () => {
     fetchItem();
   }, [id]);
 
-  if (!item) return <Text>Loading...</Text>;
-
-  //back button
   const handleBack = () => {
     resetClothingStore();
     resetOutfitStore();
     router.back();
   };
 
-  //Deleting clothing item button
-  const handleDelete = async () => {
-    //confirmation for deletion using pop-up
-    const flag = false;
+  const handleDelete = () => {
     Alert.alert(
-      "Delete Item",
+      "Delete item",
       `Are you sure you want to delete this ${type} item?`,
       [
         { text: "Cancel", style: "cancel" },
@@ -88,12 +84,9 @@ const Item = () => {
           onPress: async () => {
             try {
               if (type === "clothing") {
-                const path = clothing.imageUrl;
-
-                await deleteImage(path);
+                await deleteImage(clothing.imageUrl);
                 await deleteClothing(clothing.cid);
 
-                //decrement clothing stats
                 if (clothing.brand) {
                   await incrementStatCount(
                     user.uid,
@@ -107,9 +100,7 @@ const Item = () => {
                 resetClothingStore();
                 router.back();
               } else {
-                const path = outfit.imageUrl;
-
-                await deleteImage(path);
+                await deleteImage(outfit.imageUrl);
                 await deleteOutfit(outfit.oid);
 
                 resetOutfitStore();
@@ -127,17 +118,12 @@ const Item = () => {
   const onImagePicked = async (uri) => {
     if (type === "clothing") {
       try {
-        //Delete old image
         if (clothing.imageUrl) await deleteImage(clothing.imageUrl);
-
-        //Upload new image
         const downloadUrl = await storeClothingItem(
           uri,
           clothing.cid,
           clothing.uid,
         );
-
-        // Update ClothingStore and Firestore
         const updatedClothing = { ...clothing, imageUrl: downloadUrl };
         loadClothing(updatedClothing);
         await updateClothing(clothing.cid, { imageUrl: downloadUrl });
@@ -146,13 +132,8 @@ const Item = () => {
       }
     } else {
       try {
-        //Delete old image
         if (outfit.imageUrl) await deleteImage(outfit.imageUrl);
-
-        //Upload new image
         const downloadUrl = await storeOutfitItem(uri, outfit.oid, outfit.uid);
-
-        // Update OutfitStore and Firestore
         const updatedOutfit = { ...outfit, imageUrl: downloadUrl };
         loadOutfit(updatedOutfit);
         await updateOutfit(outfit.oid, { imageUrl: downloadUrl });
@@ -164,179 +145,239 @@ const Item = () => {
 
   const { pickImage } = useImagePicker(onImagePicked);
 
-  //"Pencil" edit icon pushes users to respective item editing screen under /(attributes)
   const handleEdit = () => {
     try {
       if (type === "clothing") {
-        const cid = clothing.cid;
         router.push({
           pathname: "/EditClothing",
-          params: { cid: cid },
+          params: { cid: clothing.cid },
         });
       } else {
-        const oid = outfit.oid;
-        router.push({
-          pathname: "/EditOutfit",
-          params: { oid: oid },
-        });
+        router.push({ pathname: "/EditOutfit", params: { oid: outfit.oid } });
       }
     } catch (error) {
       console.log("Error while pushing to edit item", error);
     }
   };
 
+  if (!item) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={["top"]}>
+        <View style={styles.centered}>
+          <AppText style={styles.fallbackText}>Loading...</AppText>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const colourHex =
+    COLOURS.find((c) => c.label === clothing.colour)?.hex ?? colors.line;
+  const needsSwatchBorder = ["white", "cream", "silver", "beige"].includes(
+    clothing.colour,
+  );
+
   return (
-    <View style={styles.body}>
-      <FontAwesome5
-        name="arrow-left"
-        size={24}
-        color="black"
-        onPress={handleBack}
-      ></FontAwesome5>
-      <View style={styles.imageView}>
-        {type === "clothing" ? (
-          <Image
-            source={{
-              uri: clothing.imageUrl,
-            }}
-            style={styles.image}
-          />
-        ) : (
-          <Image
-            source={{
-              uri: outfit.imageUrl,
-            }}
-            style={styles.image}
-          />
-        )}
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <View style={styles.header}>
+        <Pressable onPress={handleBack} hitSlop={12}>
+          <FontAwesome5 name="arrow-left" size={18} color={colors.ink} />
+        </Pressable>
+        <AppText weight="medium" style={styles.headerTitle}>
+          {type === "clothing" ? "Clothing item" : "Outfit"}
+        </AppText>
+        <View style={styles.headerActions}>
+          <Pressable onPress={handleEdit} hitSlop={10}>
+            <FontAwesome5 name="pencil-alt" size={15} color={colors.ink} />
+          </Pressable>
+          <Pressable onPress={handleDelete} hitSlop={10}>
+            <FontAwesome5 name="trash" size={15} color={colors.textMuted} />
+          </Pressable>
+        </View>
       </View>
-      <View style={styles.itemInfo}>
-        {type === "clothing" ? (
-          <>
-            <View style={styles.colourInfo}>
-              <Text>Colour: {clothing.colour}</Text>
-              {clothing.colour && (
-                <View style={styles.colourRow}>
-                  <View
-                    style={[
-                      styles.swatch,
-                      {
-                        backgroundColor:
-                          COLOURS.find((c) => c.label === clothing.colour)
-                            ?.hex ?? "#ccc",
-                      },
-                      ["white", "cream", "silver", "beige"].includes(
-                        clothing.colour,
-                      ) && styles.swatchBordered,
-                    ]}
+
+      <View style={styles.body}>
+        <Pressable onPress={pickImage} style={styles.frame}>
+          <Image
+            source={{
+              uri: type === "clothing" ? clothing.imageUrl : outfit.imageUrl,
+            }}
+            style={styles.image}
+            resizeMode="cover"
+          />
+          <View style={styles.replaceHint}>
+            <FontAwesome5 name="camera" size={12} color={colors.paper} />
+          </View>
+        </Pressable>
+
+        <View style={styles.card}>
+          {type === "clothing" ? (
+            <>
+              <AttributeRow
+                label="Colour"
+                isLast={false}
+                rightContent={
+                  clothing.colour ? (
+                    <View style={styles.colourValue}>
+                      <View
+                        style={[
+                          styles.swatch,
+                          { backgroundColor: colourHex },
+                          needsSwatchBorder && styles.swatchBordered,
+                        ]}
+                      />
+                      <AppText weight="medium" style={styles.value}>
+                        {clothing.colour}
+                      </AppText>
+                    </View>
+                  ) : undefined
+                }
+                value={!clothing.colour ? "—" : undefined}
+              />
+              <AttributeRow label="Brand" value={clothing.brand} />
+              <AttributeRow label="Material" value={clothing.material} />
+              <AttributeRow label="Season" value={clothing.season} />
+              <AttributeRow label="Type" value={clothing.type} />
+              <AttributeRow
+                label="Indoor / Outdoor"
+                value={clothing.inOut}
+                isLast
+              />
+            </>
+          ) : (
+            <>
+              <AttributeRow label="Style" value={outfit.style} />
+              <AttributeRow label="Season" value={outfit.season} />
+              <AttributeRow label="Occasion" value={outfit.occasion} isLast />
+            </>
+          )}
+        </View>
+
+        {type === "outfit" ? (
+          <View style={styles.fieldGroup}>
+            <AppText weight="medium" style={styles.fieldLabel}>
+              Associated clothing
+            </AppText>
+            <View style={styles.clothingRow}>
+              {(outfit.clothingItems ?? []).length === 0 ? (
+                <AppText style={styles.fallbackText}>
+                  No clothing linked yet
+                </AppText>
+              ) : (
+                (outfit.clothingItems ?? []).map((clothingItem) => (
+                  <Image
+                    key={clothingItem.cid}
+                    source={{ uri: clothingItem.imageUrl }}
+                    style={styles.clothingThumb}
                   />
-                  <Text>{clothing.colour}</Text>
-                </View>
+                ))
               )}
             </View>
-            <View style={styles.brandInfo}>
-              <Text>Brand: {clothing.brand}</Text>
-            </View>
-            <View style={styles.material}>
-              <Text>Material: {clothing.material}</Text>
-            </View>
-            <View styles={styles.seasonInfo}>
-              <Text>Season: {clothing.season}</Text>
-            </View>
-            <View style={styles.typeInfo}>
-              <Text>Type: {clothing.type}</Text>
-            </View>
-            <View style={styles.inOutInfo}>
-              <Text>InOut: {clothing.inOut}</Text>
-            </View>
-          </>
-        ) : (
-          <>
-            <View>
-              <Text>Style: {outfit.style}</Text>
-            </View>
-            <View>
-              <Text>Season: {outfit.season}</Text>
-            </View>
-            <View>
-              <Text>Occasion: {outfit.occasion}</Text>
-            </View>
-            <View>
-              <Text>Associated Clothings: </Text>
-              <View style={styles.list}>
-                {outfit.clothingItems.map((item) => (
-                  <Image
-                    key={item.cid}
-                    source={{ uri: item.imageUrl }}
-                    style={styles.clothingImage}
-                  />
-                ))}
-              </View>
-            </View>
-          </>
-        )}
+          </View>
+        ) : null}
       </View>
-      <View style={styles.editSect}>
-        <FontAwesome5
-          name="pencil-alt"
-          size={24}
-          color="black"
-          onPress={handleEdit}
-        />
-        <FontAwesome5
-          name="trash"
-          size={24}
-          color="black"
-          onPress={handleDelete}
-        />
-      </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
 export default Item;
 
 const styles = StyleSheet.create({
-  body: {
-    marginTop: 50,
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.paper,
   },
-  backBtn: {
-    width: "10%",
-    backgroundColor: "none",
-  },
-  imageView: {
-    display: "flex",
-    justifyContent: "center",
+  centered: {
+    flex: 1,
     alignItems: "center",
+    justifyContent: "center",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+  },
+  headerTitle: {
+    fontSize: 12,
+    letterSpacing: 1,
+    color: colors.textMuted,
+  },
+  headerActions: {
+    flexDirection: "row",
+    gap: spacing.md,
+  },
+  body: {
+    padding: spacing.lg,
+    gap: spacing.lg,
+  },
+  frame: {
+    width: "100%",
+    aspectRatio: 1,
+    borderRadius: radius.lg,
+    overflow: "hidden",
+    backgroundColor: colors.surface,
+    position: "relative",
   },
   image: {
-    width: "80%",
-    height: 300,
-    margin: 20,
+    width: "100%",
+    height: "100%",
+  },
+  replaceHint: {
+    position: "absolute",
+    bottom: spacing.sm,
+    right: spacing.sm,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(43, 42, 40, 0.45)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  card: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing.md,
+  },
+  colourValue: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs + 2,
   },
   swatch: {
-    borderRadius: 10,
-    width: 20,
-    height: 20,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+  },
+  swatchBordered: {
     borderWidth: 1,
+    borderColor: colors.line,
   },
-  editSect: {
-    display: "flex",
+  value: {
+    fontSize: 14,
+    color: colors.textMuted,
+    textTransform: "capitalize",
+  },
+  fieldGroup: {
+    gap: spacing.xs + 2,
+  },
+  fieldLabel: {
+    fontSize: 12,
+    letterSpacing: 0.5,
+    color: colors.textMuted,
+  },
+  clothingRow: {
     flexDirection: "row",
-    width: "100%",
-    justifyContent: "space-evenly",
-    marginTop: 20,
+    flexWrap: "wrap",
+    gap: spacing.xs + 2,
   },
-  list: {
-    justifyContent: "left",
-    paddingBottom: 40,
-    display: "flex",
-    flexDirection: "row",
+  clothingThumb: {
+    width: 72,
+    height: 72,
+    borderRadius: radius.md,
   },
-  clothingImage: {
-    width: 100,
-    height: 100,
-    margin: 5,
-    borderRadius: 10,
+  fallbackText: {
+    fontSize: 13,
+    color: colors.textMuted,
   },
 });

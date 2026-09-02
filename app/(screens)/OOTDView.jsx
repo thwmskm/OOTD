@@ -1,22 +1,19 @@
 //Ootd page for editing and viewing already posted ootd. Saves on the spot rather than routing home
 import {
-  Text,
   StyleSheet,
   View,
-  SafeAreaView,
   Image,
-  Button,
   TextInput,
   Alert,
   ScrollView,
+  Pressable,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useState, useEffect } from "react";
 import useOOTDStore from "../../services/stores/ootdStore";
 import useUserStore from "../../services/stores/userStore";
 import { useRouter } from "expo-router";
-import { updateOOTD } from "../../services/ootdService";
-import { deleteOOTD } from "../../services/ootdService";
-import { getOOTD } from "../../services/ootdService";
+import { updateOOTD, deleteOOTD, getOOTD } from "../../services/ootdService";
 import { FontAwesome5 } from "@expo/vector-icons";
 import useStreak from "../hooks/useStreak";
 import ColourPicker, { COLOURS } from "../components/ColourPicker";
@@ -25,37 +22,38 @@ import {
   incrementStatCount,
   incrementStatCounts,
 } from "../../services/userStatsService";
+import AppText from "../components/AppText";
+import AppButton from "../components/AppButton";
+import { colors, spacing, radius } from "../../constants/theme";
 
 const OOTDView = () => {
   const router = useRouter();
-  //userStore initialization
   const user = useUserStore((state) => state.user);
 
-  //ootdStore initialization
   const ootd = useOOTDStore((state) => state.ootd);
   const setOotd = useOOTDStore((state) => state.setOotd);
   const resetOotdStore = useOOTDStore((state) => state.resetOotdStore);
 
-  //initialize useStreak hook
-  const { deleteStreak } = useStreak(user?.uid ?? "");
+  const { deleteStreak } = useStreak();
 
-  //states for the saves for the oots post
   const [saves, setSaves] = useState(0);
   const [flag, setFlag] = useState(false);
-  //state for editing caption mode
   const [isEditing, setIsEditing] = useState(false);
-  //state to keep caption changes
   const [caption, setCaption] = useState(ootd.caption);
   const [style, setStyle] = useState(ootd.style);
   const [colourScheme, setColourScheme] = useState(ootd.colourScheme ?? []);
-  //state for createdAt for editing/deleting permissions
   const [createdAt, setCreatedAt] = useState("");
 
-  //create date of upload (YYY-MM-DD)
   const now = new Date();
   const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const dateLabel = now
+    .toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    })
+    .toUpperCase();
 
-  //Fetch saves from db
   useEffect(() => {
     if (!user) return;
 
@@ -78,14 +76,11 @@ const OOTDView = () => {
     fetchOotd();
   }, [user?.uid, date, ootd.caption]);
 
-  //condition to see if edit duration is up or not
   const canEdit =
     createdAt && Date.now() - createdAt.toMillis() < 10 * 60 * 1000;
 
-  //toggle between editing and not editing state
   const toggleEdit = () => setIsEditing((prev) => !prev);
 
-  //handle deletion of ootd
   const handleDelete = async () => {
     if (!user) return;
 
@@ -100,10 +95,8 @@ const OOTDView = () => {
           onPress: async () => {
             try {
               const id = `${user.uid}_${date}`;
-              //delete ootd from db
               await deleteOOTD(id);
 
-              //decrement the ootd stats
               await incrementTotalOOTDs(user.uid, -1);
               if (ootd.style) {
                 await incrementStatCount(
@@ -122,9 +115,8 @@ const OOTDView = () => {
                   -1,
                 );
               }
-              //reset ootdStore
+
               resetOotdStore();
-              //adjust streak accordingly
               await deleteStreak();
               router.replace("/(tabs)");
             } catch (error) {
@@ -140,14 +132,12 @@ const OOTDView = () => {
     );
   };
 
-  //write save to db and toggle back isEditing === false
   const handleSave = async () => {
     if (!user) return;
     try {
       const id = `${user.uid}_${date}`;
       await updateOOTD(id, { caption, style, colourScheme });
 
-      //adjust styleCounts if style actually changed
       if (ootd.style !== style) {
         if (ootd.style) {
           await incrementStatCount(user.uid, "styleCounts", ootd.style, -1);
@@ -157,7 +147,6 @@ const OOTDView = () => {
         }
       }
 
-      //adjust colourCounts: decrement removed colours, increment added ones
       const oldColours = ootd.colourScheme ?? [];
       const newColours = colourScheme ?? [];
       const removed = oldColours.filter((c) => !newColours.includes(c));
@@ -180,123 +169,286 @@ const OOTDView = () => {
     }
   };
 
-  return !isEditing ? (
-    <>
-      <Text>{date}</Text>
-      <Image source={{ uri: ootd.imageUrl }} style={styles.ootdImage}></Image>
-      {flag ? (
-        <View>
-          <Text>Saves: {saves}</Text>
+  const Header = ({ title }) => (
+    <View style={styles.header}>
+      <Pressable
+        onPress={() => (isEditing ? toggleEdit() : router.back())}
+        hitSlop={12}
+      >
+        <FontAwesome5 name="arrow-left" size={18} color={colors.ink} />
+      </Pressable>
+      <AppText weight="medium" style={styles.headerTitle}>
+        {title}
+      </AppText>
+      {!isEditing && canEdit ? (
+        <View style={styles.headerActions}>
+          <Pressable onPress={toggleEdit} hitSlop={10}>
+            <FontAwesome5 name="pencil-alt" size={15} color={colors.ink} />
+          </Pressable>
+          <Pressable onPress={handleDelete} hitSlop={10}>
+            <FontAwesome5 name="trash" size={15} color={colors.textMuted} />
+          </Pressable>
         </View>
       ) : (
-        <></>
+        <View style={styles.headerSpacer} />
       )}
-      <View style={styles.captionArea}>
-        <Text>{ootd.caption}</Text>
+    </View>
+  );
+
+  if (isEditing) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={["top"]}>
+        <Header title="EDITING" />
+        <ScrollView contentContainerStyle={styles.editBody}>
+          <View style={styles.frame}>
+            <Image
+              source={{ uri: ootd.imageUrl }}
+              style={styles.image}
+              resizeMode="cover"
+            />
+          </View>
+
+          <View style={styles.fieldGroup}>
+            <AppText weight="medium" style={styles.fieldLabel}>
+              Caption
+            </AppText>
+            <TextInput
+              onChangeText={setCaption}
+              value={caption}
+              placeholder="Say something about today's fit"
+              placeholderTextColor={colors.textMuted}
+              style={styles.textInput}
+              multiline
+            />
+          </View>
+
+          <View style={styles.fieldGroup}>
+            <AppText weight="medium" style={styles.fieldLabel}>
+              Style
+            </AppText>
+            <TextInput
+              onChangeText={setStyle}
+              value={style}
+              placeholder="e.g. Streetwear, Minimal, Y2K"
+              placeholderTextColor={colors.textMuted}
+              style={styles.textInput}
+            />
+          </View>
+
+          <View style={styles.fieldGroup}>
+            <AppText weight="medium" style={styles.fieldLabel}>
+              Colours
+            </AppText>
+            <ColourPicker selected={colourScheme} onChange={setColourScheme} />
+          </View>
+
+          <AppButton
+            title="Save changes"
+            onPress={handleSave}
+            style={styles.saveBtn}
+          />
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <Header title={dateLabel} />
+
+      <View style={styles.frame}>
+        <Image
+          source={{ uri: ootd.imageUrl }}
+          style={styles.image}
+          resizeMode="cover"
+        />
+
+        {flag ? (
+          <View style={styles.savesOverlay}>
+            <FontAwesome5
+              name="bookmark"
+              size={12}
+              color={colors.paper}
+              solid
+            />
+            <AppText weight="medium" style={styles.savesText}>
+              {saves}
+            </AppText>
+          </View>
+        ) : null}
+
+        {ootd.caption ? (
+          <View style={styles.bottomScrim}>
+            <AppText weight="regular" style={styles.captionText}>
+              {ootd.caption}
+            </AppText>
+          </View>
+        ) : null}
       </View>
-      <Text>Style: {ootd.style}</Text>
-      <View style={styles.tagRow}>
-        {(ootd.colourScheme ?? []).map((label) => {
-          const hex = COLOURS.find((c) => c.label === label)?.hex ?? "#ccc";
-          return (
-            <View key={label} style={styles.tag}>
-              <View style={[styles.tagSwatch, { backgroundColor: hex }]} />
-              <Text style={styles.tagLabel}>{label}</Text>
+
+      <View style={styles.detailPanel}>
+        <View style={styles.tagRow}>
+          {ootd.style ? (
+            <View style={styles.tag}>
+              <AppText weight="medium" style={styles.tagText}>
+                {ootd.style}
+              </AppText>
             </View>
-          );
-        })}
-      </View>
-      {canEdit === true ? (
-        <View style={styles.editSection}>
-          <FontAwesome5
-            name="pencil-alt"
-            size={24}
-            color="black"
-            onPress={toggleEdit}
-          />
-          <FontAwesome5
-            name="trash"
-            size={24}
-            color="black"
-            onPress={handleDelete}
-          />
+          ) : null}
+
+          {(ootd.colourScheme ?? []).map((label) => {
+            const hex =
+              COLOURS.find((c) => c.label === label)?.hex ?? colors.line;
+            return (
+              <View key={label} style={styles.tag}>
+                <View style={[styles.tagSwatch, { backgroundColor: hex }]} />
+                <AppText weight="medium" style={styles.tagText}>
+                  {label}
+                </AppText>
+              </View>
+            );
+          })}
         </View>
-      ) : (
-        <></>
-      )}
-    </>
-  ) : (
-    <ScrollView style={styles.body}>
-      <Text>{date}</Text>
-      <Image source={{ uri: ootd.imageUrl }} style={styles.ootdImage}></Image>
-      {flag ? (
-        <View>
-          <Text>Saves: {saves}</Text>
-        </View>
-      ) : (
-        <></>
-      )}
-      <View style={styles.captionArea}>
-        <TextInput
-          onChangeText={setCaption}
-          value={caption}
-          defaultValue={ootd.caption}
-          style={styles.textInput}
-        ></TextInput>
+
+        {!canEdit ? (
+          <AppText weight="regular" style={styles.lockedNote}>
+            Editing window has closed for today's post
+          </AppText>
+        ) : null}
       </View>
-      <TextInput
-        onChangeText={setStyle}
-        value={style}
-        defaultValue={ootd.style}
-        style={styles.textInput}
-      ></TextInput>
-      <ColourPicker selected={colourScheme} onChange={setColourScheme} />
-      <View style={styles.editSection}>
-        <Button title="Save" onPress={handleSave}></Button>
-      </View>
-    </ScrollView>
+    </SafeAreaView>
   );
 };
 
 export default OOTDView;
 
 const styles = StyleSheet.create({
-  body: {
-    marginTop: 50,
-    marginBottom: 50,
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.paper,
   },
-  textInput: {
-    borderWidth: 1,
-    borderColor: "black",
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
   },
-  ootdImage: {
-    width: 300,
-    height: 400,
+  headerTitle: {
+    fontSize: 12,
+    letterSpacing: 1,
+    color: colors.textMuted,
+  },
+  headerActions: {
+    flexDirection: "row",
+    gap: spacing.md,
+  },
+  headerSpacer: {
+    width: 18,
+  },
+  frame: {
+    width: "95%",
+    alignSelf: "center",
+    aspectRatio: 3 / 4,
+    borderRadius: radius.lg,
+    overflow: "hidden",
+    position: "relative",
+    backgroundColor: colors.surface,
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+  },
+  savesOverlay: {
+    position: "absolute",
+    top: spacing.md,
+    right: spacing.md,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "rgba(43, 42, 40, 0.55)",
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+  },
+  savesText: {
+    fontSize: 12,
+    color: colors.paper,
+  },
+  bottomScrim: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.md,
+    backgroundColor: "rgba(43, 42, 40, 0.35)",
+  },
+  captionText: {
+    fontSize: 14,
+    color: colors.paper,
+    textAlign: "left",
+  },
+  detailPanel: {
+    padding: spacing.lg,
+    gap: spacing.md,
   },
   tagRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
-    marginVertical: 6,
+    gap: spacing.sm,
   },
   tag: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "#f0f0f0",
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    backgroundColor: colors.surface,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
   },
   tagSwatch: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    borderWidth: 0.5,
-    borderColor: "#ccc",
+    borderWidth: 1,
+    borderColor: colors.line,
   },
-  tagLabel: {
+  tagText: {
     fontSize: 12,
+    color: colors.ink,
     textTransform: "capitalize",
+  },
+  lockedNote: {
+    fontSize: 12,
+    color: colors.textMuted,
+    fontStyle: "italic",
+  },
+  editBody: {
+    padding: spacing.lg,
+    gap: spacing.lg,
+    paddingBottom: spacing.xl,
+  },
+  fieldGroup: {
+    gap: spacing.xs,
+  },
+  fieldLabel: {
+    fontSize: 12,
+    letterSpacing: 0.5,
+    color: colors.textMuted,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+    fontSize: 14,
+    color: colors.ink,
+    fontFamily: "Pretendard_Regular",
+  },
+  saveBtn: {
+    marginTop: spacing.sm,
   },
 });

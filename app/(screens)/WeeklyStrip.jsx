@@ -3,16 +3,19 @@ import {
   View,
   Image,
   FlatList,
-  Text,
   StyleSheet,
   Dimensions,
   Pressable,
-  SafeAreaView,
   Alert,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { FontAwesome5 } from "@expo/vector-icons";
 import ViewShot from "react-native-view-shot";
 import * as MediaLibrary from "expo-media-library";
 import useWeeklyStrip from "../hooks/useFetchWeek";
+import AppText from "../components/AppText";
+import AppButton from "../components/AppButton";
+import { colors, spacing, radius } from "../../constants/theme";
 
 const DAY_LABELS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 const SLOT_WIDTH = Dimensions.get("window").width * 0.72;
@@ -51,14 +54,22 @@ const WeeklyStrip = () => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>—</Text>
-      </View>
+      <SafeAreaView style={styles.loadingContainer}>
+        <AppText weight="regular" style={styles.loadingText}>
+          Loading your week...
+        </AppText>
+      </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={styles.screen} edges={["top"]}>
+      <View style={styles.header}>
+        <AppText weight="bold" style={styles.headerTitle}>
+          This week
+        </AppText>
+      </View>
+
       {/* ── Scrollable strip (visible to user) ── */}
       <View style={styles.container}>
         <FlatList
@@ -67,9 +78,10 @@ const WeeklyStrip = () => {
           keyExtractor={(_, index) => DAY_LABELS[index]}
           horizontal
           showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.listContent}
           getItemLayout={(_, index) => ({
-            length: SLOT_WIDTH,
-            offset: SLOT_WIDTH * index,
+            length: SLOT_WIDTH + spacing.sm,
+            offset: (SLOT_WIDTH + spacing.sm) * index,
             index,
           })}
           initialScrollIndex={TODAY_INDEX}
@@ -93,12 +105,19 @@ const WeeklyStrip = () => {
                     resizeMode="cover"
                   />
                 ) : (
-                  <View style={styles.empty} />
+                  <View style={styles.empty}>
+                    <AppText weight="regular" style={styles.emptyText}>
+                      No post
+                    </AppText>
+                  </View>
                 )}
-                <View style={styles.labelContainer}>
-                  <Text style={[styles.label, isToday && styles.labelToday]}>
+                <View style={styles.labelPill}>
+                  <AppText
+                    weight="medium"
+                    style={[styles.label, isToday && styles.labelToday]}
+                  >
                     {DAY_LABELS[index]}
-                  </Text>
+                  </AppText>
                   {isToday && <View style={styles.todayDot} />}
                 </View>
               </View>
@@ -130,10 +149,13 @@ const WeeklyStrip = () => {
                 ) : (
                   <View style={styles.captureEmpty} />
                 )}
-                <View style={styles.labelContainer}>
-                  <Text style={[styles.label, isToday && styles.labelToday]}>
+                <View style={styles.labelPill}>
+                  <AppText
+                    weight="medium"
+                    style={[styles.label, isToday && styles.labelToday]}
+                  >
                     {DAY_LABELS[index]}
-                  </Text>
+                  </AppText>
                   {isToday && <View style={styles.todayDot} />}
                 </View>
               </View>
@@ -143,9 +165,13 @@ const WeeklyStrip = () => {
       </View>
 
       {/* ── Save button ── */}
-      <Pressable style={styles.saveBtn} onPress={handleSave}>
-        <Text style={styles.saveBtnText}>SAVE STRIP</Text>
-      </Pressable>
+      <View style={styles.footer}>
+        <AppButton
+          title="Save strip"
+          onPress={handleSave}
+          style={styles.saveBtn}
+        />
+      </View>
     </SafeAreaView>
   );
 };
@@ -155,26 +181,40 @@ export default WeeklyStrip;
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    backgroundColor: colors.paper,
+  },
+  header: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+  },
+  headerTitle: {
+    fontSize: 18,
+    color: colors.ink,
   },
   container: {
     height: SLOT_HEIGHT,
   },
+  listContent: {
+    paddingHorizontal: spacing.lg,
+  },
   loadingContainer: {
-    height: SLOT_HEIGHT,
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#0e0e0e",
+    backgroundColor: colors.paper,
   },
   loadingText: {
-    color: "#f0ece4",
-    fontFamily: "SpaceGrotesk",
-    letterSpacing: 4,
+    fontSize: 13,
+    color: colors.textMuted,
+    letterSpacing: 1,
   },
 
   // ── Scrollable strip ──
   slot: {
     height: SLOT_HEIGHT,
     position: "relative",
+    overflow: "hidden",
+    backgroundColor: colors.surface,
   },
   image: {
     width: "100%",
@@ -183,30 +223,41 @@ const styles = StyleSheet.create({
   empty: {
     width: "100%",
     height: "100%",
-    backgroundColor: "#0e0e0e",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.surface,
   },
-  labelContainer: {
+  emptyText: {
+    fontSize: 12,
+    color: colors.textMuted,
+  },
+  labelPill: {
     position: "absolute",
-    bottom: 12,
-    left: 10,
-    alignItems: "flex-start",
-    gap: 4,
+    bottom: spacing.sm,
+    left: spacing.sm,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "rgba(43, 42, 40, 0.5)",
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
   },
   label: {
-    color: "#f0ece4",
     fontSize: 10,
-    fontFamily: "SpaceGrotesk",
-    letterSpacing: 2,
-    opacity: 0.5,
+    letterSpacing: 1.5,
+    color: colors.paper,
+    opacity: 0.7,
   },
   labelToday: {
     opacity: 1,
-    color: "#C8F135",
+    color: colors.sage,
   },
   todayDot: {
     width: 4,
     height: 4,
-    backgroundColor: "#C8F135",
+    borderRadius: 2,
+    backgroundColor: colors.sage,
   },
 
   // ── Hidden capture view ──
@@ -218,7 +269,7 @@ const styles = StyleSheet.create({
   captureStrip: {
     flexDirection: "row",
     height: CAPTURE_HEIGHT,
-    backgroundColor: "#0e0e0e",
+    backgroundColor: colors.paper,
   },
   captureSlot: {
     height: CAPTURE_HEIGHT,
@@ -231,20 +282,14 @@ const styles = StyleSheet.create({
   captureEmpty: {
     width: "100%",
     height: "100%",
-    backgroundColor: "#0e0e0e",
+    backgroundColor: colors.surface,
   },
 
   // ── Save button ──
-  saveBtn: {
-    marginTop: 16,
-    marginHorizontal: 16,
-    paddingVertical: 12,
-    borderWidth: 1,
-    alignItems: "center",
+  footer: {
+    padding: spacing.lg,
   },
-  saveBtnText: {
-    fontFamily: "SpaceGrotesk",
-    fontSize: 11,
-    letterSpacing: 3,
+  saveBtn: {
+    width: "100%",
   },
 });
