@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome5 } from "@expo/vector-icons";
 import ViewShot from "react-native-view-shot";
-import * as MediaLibrary from "expo-media-library";
+//import * as MediaLibrary from "expo-media-library";
 import useWeeklyStrip from "../hooks/useFetchWeek";
 import AppText from "../components/AppText";
 import AppButton from "../components/AppButton";

@@ -9,17 +9,33 @@ import {
 
 const storage = getStorage();
 
-//converting uri to Blob for firebase storage to upload
-const blobify = async (uri: string): Promise<Blob> => {
-  const response = await fetch(uri);
-  const blob = await response.blob();
-  return blob;
+//converting uri to Blob for firebase storage to upload.
+//NOTE: fetch(uri).blob() is unreliable for local file:// / content:// uris in RN —
+//it can silently truncate/corrupt the data. uploadString('base64') is also a dead
+//end here, since RN's Blob polyfill can't be constructed from an ArrayBuffer.
+//XMLHttpRequest with responseType 'blob' goes through RN's native blob bridge
+//instead of a JS-side read, and reliably produces the full, correct file data.
+//This is Firebase's own documented workaround for React Native.
+const blobify = (uri: string): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.onload = function () {
+      resolve(xhr.response as Blob);
+    };
+    xhr.onerror = function () {
+      reject(new TypeError("Network request failed while reading local file"));
+    };
+    xhr.responseType = "blob";
+    xhr.open("GET", uri, true);
+    xhr.send(null);
+  });
 };
 
 //uploading to storage function.
 export const storeImage = async (uri: string, path: string): Promise<string> => {
+  let blob: Blob | null = null;
   try {
-    const blob = await blobify(uri);
+    blob = await blobify(uri);
     const storageRef = ref(storage, path);
 
     const metaData = {
@@ -33,6 +49,10 @@ export const storeImage = async (uri: string, path: string): Promise<string> => 
   } catch (error) {
     console.error("Error while uploading image:", error);
     throw error;
+  } finally {
+    // release the native blob reference once we're done with it
+    // @ts-ignore - close() exists on RN's Blob but isn't in the lib.dom typings
+    blob?.close?.();
   }
 };
 

@@ -1,12 +1,8 @@
 import React, { memo } from "react";
-import {
-  Dimensions,
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
+import { Dimensions, View, StyleSheet, TouchableOpacity } from "react-native";
 import { CalendarList } from "react-native-calendars";
+import AppText from "./AppText";
+import { colors, spacing, typography } from "../../constants/theme";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CELL_SIZE = SCREEN_WIDTH / 7;
@@ -14,6 +10,7 @@ const CELL_SIZE = SCREEN_WIDTH / 7;
 const CustomDay = memo(({ date, state, marking, onPress }) => {
   const isSelectedMonth = state !== "disabled";
   const isMarked = marking?.marked ?? false;
+  const isToday = state === "today";
 
   return (
     <TouchableOpacity
@@ -21,17 +18,22 @@ const CustomDay = memo(({ date, state, marking, onPress }) => {
       onPress={() => isSelectedMonth && onPress(date)}
       disabled={!isSelectedMonth}
     >
-      {isMarked && isSelectedMonth && <Text style={styles.mark}>*</Text>}
+      {isMarked && isSelectedMonth && (
+        <AppText weight="bold" style={styles.mark}>
+          *
+        </AppText>
+      )}
       <View style={styles.textContainer}>
-        <Text
+        <AppText
+          weight={isToday ? "bold" : "regular"}
           style={[
             styles.dayText,
-            state === "today" && styles.todayText,
+            isToday && styles.todayText,
             !isSelectedMonth && styles.disabledText,
           ]}
         >
           {date.day}
-        </Text>
+        </AppText>
       </View>
     </TouchableOpacity>
   );
@@ -54,6 +56,15 @@ const CalendarScroll = ({ markedDates = {}, onDayPress, onMonthChange }) => {
         if (onMonthChange && months[0]) onMonthChange(months[0]);
       }}
       theme={{
+        backgroundColor: colors.paper,
+        calendarBackground: colors.paper,
+        textSectionTitleColor: colors.textMuted,
+        monthTextColor: colors.ink,
+        arrowColor: colors.ink,
+        textMonthFontFamily: typography.bold,
+        textDayHeaderFontFamily: typography.medium,
+        textMonthFontSize: 16,
+        textDayHeaderFontSize: 12,
         "stylesheet.calendar.main": {
           week: {
             marginTop: 0,
@@ -82,38 +93,35 @@ const styles = StyleSheet.create({
     width: CELL_SIZE,
     height: CELL_SIZE,
     borderWidth: 0.5,
-    borderColor: "#e1e1e1",
-    backgroundColor: "#ffffff",
+    borderColor: colors.line,
+    backgroundColor: colors.paper,
     overflow: "hidden",
   },
   disabledCell: {
-    backgroundColor: "#f9f9f9",
+    backgroundColor: colors.surface,
   },
   mark: {
-    width: 10,
-    height: 10,
-    borderRadius: 3,
+    fontSize: 14,
+    color: colors.sage,
     position: "absolute",
-    top: 6,
+    top: 4,
     alignSelf: "center",
   },
   textContainer: {
     flex: 1,
     justifyContent: "flex-end",
     alignItems: "flex-end",
-    paddingRight: 6,
-    paddingBottom: 6,
+    paddingRight: spacing.xs,
+    paddingBottom: spacing.xs,
   },
   dayText: {
     fontSize: 11,
-    color: "#2d4150",
-    fontWeight: "500",
+    color: colors.ink,
   },
   todayText: {
-    color: "#00adf5",
-    fontWeight: "bold",
+    color: colors.blush,
   },
   disabledText: {
-    color: "#d9e1e8",
+    color: colors.line,
   },
 });

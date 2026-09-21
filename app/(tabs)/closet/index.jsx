@@ -1,8 +1,7 @@
 import { StyleSheet, View, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useState, useEffect, useCallback } from "react";
-import { useRouter } from "expo-router";
-import { useFocusEffect } from "@react-navigation/native";
+import { useRouter, useFocusEffect } from "expo-router";
 import { useImagePicker } from "../../hooks/useImagePicker";
 import useClosetFilter from "../../hooks/useClosetFilter";
 import useClosetSort from "../../hooks/useClosetSort";
@@ -81,7 +80,7 @@ const ClosetIndex = () => {
   const handlePickClothing = (pickedType) => {
     pickImage((uri) => {
       router.push({
-        pathname: "/(attributes)",
+        pathname: "/(screens)/(attributes)",
         params: { imageUrl: uri, type: pickedType },
       });
     });

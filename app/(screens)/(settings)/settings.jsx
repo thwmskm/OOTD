@@ -1,18 +1,12 @@
-import {
-  Text,
-  StyleSheet,
-  View,
-  SafeAreaView,
-  Image,
-  Button,
-  Pressable,
-  ScrollView,
-  Alert,
-} from "react-native";
+import { StyleSheet, View, Pressable, ScrollView, Alert } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { FB_auth } from "../../../database/firebase";
 import useOOTDStore from "../../../services/stores/ootdStore";
 import useUserStore from "../../../services/stores/userStore";
 import { useRouter } from "expo-router";
+import AppText from "../../components/AppText";
+import { colors, spacing, radius } from "../../../constants/theme";
 
 const Settings = () => {
   const router = useRouter();
@@ -37,95 +31,143 @@ const Settings = () => {
     ]);
   };
 
+  //a single grouped-list row, with an optional trailing chevron and danger tint
+  const Row = ({ label, onPress, danger, last }) => (
+    <Pressable
+      style={[styles.setting, last && styles.settingLast]}
+      onPress={onPress}
+    >
+      <AppText
+        weight="regular"
+        style={[styles.settingName, danger && styles.danger]}
+      >
+        {label}
+      </AppText>
+      {!danger && (
+        <FontAwesome5 name="chevron-right" size={13} color={colors.textMuted} />
+      )}
+    </Pressable>
+  );
+
   return (
-    <ScrollView style={styles.body}>
-      <View style={styles.sections}>
-        <Text style={styles.label}>Account</Text>
-        <Pressable
-          style={styles.setting}
-          onPress={() => {
-            router.push("/info");
-          }}
-        >
-          <Text style={styles.settingName}>Info</Text>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <View style={styles.header}>
+        <Pressable onPress={() => router.back()} hitSlop={8}>
+          <FontAwesome5 name="arrow-left" size={20} color={colors.ink} />
         </Pressable>
-        <Pressable style={styles.setting}>
-          <Text style={styles.settingName}>Account Privacy</Text>
-        </Pressable>
-        <Pressable style={styles.setting}>
-          <Text style={[styles.settingName, styles.danger]}>
-            Delete Account
-          </Text>
-        </Pressable>
-        <Pressable style={styles.setting} onPress={handleLogout}>
-          <Text style={[styles.settingName, styles.danger]}>Logout</Text>
-        </Pressable>
+        <AppText weight="bold" style={styles.headerTitle}>
+          Settings
+        </AppText>
+        <View style={styles.headerSpacer} />
       </View>
-      <View style={styles.sections}>
-        <Text style={styles.label}>Preferences</Text>
-        <Pressable style={styles.setting}>
-          <Text style={styles.settingName}>Turn off Saves</Text>
-        </Pressable>
-        <Pressable style={styles.setting}>
-          <Text style={styles.settingName}>Notifications</Text>
-        </Pressable>
-        <Pressable style={styles.setting}>
-          <Text style={styles.settingName}>Temperature Unit</Text>
-        </Pressable>
-      </View>
-      <View style={styles.sections}>
-        <Text style={styles.label}>YU*YL Customer Services</Text>
-        <Pressable style={styles.setting}>
-          <Text style={styles.settingName}>FAQ</Text>
-        </Pressable>
-        <Pressable style={styles.setting}>
-          <Text style={styles.settingName}>Feedback</Text>
-        </Pressable>
-      </View>
-      <View style={styles.sections}>
-        <Text style={styles.label}>Terms of Service</Text>
-        <Pressable style={styles.setting}>
-          <Text style={styles.settingName}>Service Terms</Text>
-        </Pressable>
-        <Pressable style={styles.setting}>
-          <Text style={styles.settingName}>Privacy Policy</Text>
-        </Pressable>
-      </View>
-      <View style={styles.footer}></View>
-    </ScrollView>
+
+      <ScrollView
+        style={styles.body}
+        contentContainerStyle={styles.bodyContent}
+      >
+        <View style={styles.sections}>
+          <AppText weight="medium" style={styles.label}>
+            Account
+          </AppText>
+          <Row label="Info" onPress={() => router.push("/info")} />
+          <Row label="Account Privacy" />
+          <Row label="Delete Account" danger />
+          <Row label="Logout" onPress={handleLogout} danger last />
+        </View>
+
+        <View style={styles.sections}>
+          <AppText weight="medium" style={styles.label}>
+            Preferences
+          </AppText>
+          <Row label="Turn off Saves" />
+          <Row label="Notifications" />
+          <Row label="Temperature Unit" last />
+        </View>
+
+        <View style={styles.sections}>
+          <AppText weight="medium" style={styles.label}>
+            YU*YL Customer Services
+          </AppText>
+          <Row label="FAQ" />
+          <Row label="Feedback" last />
+        </View>
+
+        <View style={styles.sections}>
+          <AppText weight="medium" style={styles.label}>
+            Terms of Service
+          </AppText>
+          <Row label="Service Terms" />
+          <Row label="Privacy Policy" last />
+        </View>
+
+        <View style={styles.footer}></View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 export default Settings;
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.paper,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  headerTitle: {
+    fontSize: 16,
+    color: colors.ink,
+  },
+  headerSpacer: {
+    width: 20,
+  },
   body: {
-    backgroundColor: "lightgray",
-    paddingBottom: 50,
+    flex: 1,
+  },
+  bodyContent: {
+    paddingBottom: spacing.xl,
   },
   sections: {
-    margin: 15,
-    borderRadius: 8,
-    backgroundColor: "white",
-    padding: 10,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.md,
+    borderRadius: radius.lg,
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
   },
   label: {
-    color: "gray",
-    fontSize: 10,
-    borderBottomWidth: 0.5,
+    color: colors.textMuted,
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: spacing.xs,
+    marginLeft: spacing.xs,
   },
   setting: {
-    borderBottomWidth: 0.5,
-    height: 40,
-    justifyContent: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+    borderBottomColor: colors.line,
+    height: 44,
+  },
+  settingLast: {
+    borderBottomWidth: 0,
   },
   settingName: {
     fontSize: 15,
+    color: colors.ink,
   },
   danger: {
-    color: "red",
+    color: colors.blush,
   },
   footer: {
-    height: 100,
+    height: 40,
   },
 });

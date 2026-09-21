@@ -1,18 +1,12 @@
-import {
-  Text,
-  StyleSheet,
-  View,
-  Image,
-  Button,
-  Pressable,
-  TextInput,
-  Alert,
-} from "react-native";
+import { StyleSheet, View, Pressable, TextInput, Alert } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import useUserStore from "../../services/stores/userStore";
 import { updateUser } from "../../services/userService";
 import { FontAwesome5 } from "@expo/vector-icons";
+import AppText from "../components/AppText";
+import { colors, spacing, radius } from "../../constants/theme";
 
 const ChangeUsername = () => {
   const router = useRouter();
@@ -61,57 +55,70 @@ const ChangeUsername = () => {
   };
 
   return (
-    <>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <View style={styles.header}>
-        <FontAwesome5
-          size={20}
-          name="check"
-          color="blue"
-          style={styles.check}
-          onPress={handleSave}
-        />
+        <Pressable onPress={() => router.back()} hitSlop={8}>
+          <FontAwesome5 name="arrow-left" size={20} color={colors.ink} />
+        </Pressable>
+        <AppText weight="bold" style={styles.headerTitle}>
+          Change Username
+        </AppText>
+        <Pressable onPress={handleSave} hitSlop={8}>
+          <FontAwesome5 name="check" size={20} color={colors.sage} />
+        </Pressable>
       </View>
+
       <View style={styles.body}>
         <TextInput
           style={styles.input}
           value={newUsername}
           onChangeText={setNewUsername}
           placeholder={user.username}
+          placeholderTextColor={colors.textMuted}
           autoCapitalize="none"
         ></TextInput>
-        <Text style={styles.textWarning}>
+        <AppText weight="regular" style={styles.textWarning}>
           You can only make a change in your username every 14 days.
-        </Text>
+        </AppText>
       </View>
-    </>
+    </SafeAreaView>
   );
 };
 
 export default ChangeUsername;
 
 const styles = StyleSheet.create({
-  body: {
-    paddingRight: 10,
-    paddingLeft: 10,
-    marginTop: 40,
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.paper,
   },
   header: {
     flexDirection: "row",
-    justifyContent: "flex-end",
-    width: "100%",
-    marginTop: 10,
-    paddingRight: 10,
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  headerTitle: {
+    fontSize: 16,
+    color: colors.ink,
+  },
+  body: {
+    paddingHorizontal: spacing.lg,
+    marginTop: spacing.lg,
   },
   input: {
     fontSize: 16,
-    padding: 10,
-    borderStyle: "solid",
-    borderWidth: 1,
-    borderRadius: 5,
+    color: colors.ink,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
   },
   textWarning: {
-    marginTop: 10,
+    marginTop: spacing.sm,
+    marginLeft: spacing.xs,
     fontSize: 12,
-    color: "gray",
+    color: colors.textMuted,
   },
 });

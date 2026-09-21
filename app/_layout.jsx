@@ -1,23 +1,21 @@
 import { StyleSheet } from "react-native";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { FB_auth } from "../database/firebase";
 import useCheckDailyPost from "./hooks/useCheckDailyPost";
 import useUserStore from "../services/stores/userStore";
 import { getUser } from "../services/userService";
-import { router } from "expo-router";
 import useStreak from "./hooks/useStreak";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import { colors, typography, spacing } from "../constants/theme";
 
-//module scope — runs before first render, per Expo's guidance
 SplashScreen.preventAutoHideAsync();
 
 export default function Layout() {
+  const router = useRouter();
   const [userState, setUserState] = useState(undefined);
   const [hasProfile, setHasProfile] = useState(undefined);
 
@@ -27,47 +25,49 @@ export default function Layout() {
     Pretendard_Regular: require("../assets/fonts/Pretendard-Regular.ttf"),
   });
 
-  //userStore Initialization
   const user = useUserStore((state) => state.user);
   const loadUser = useUserStore((state) => state.loadUser);
   const resetUserStore = useUserStore((state) => state.resetUserStore);
   const setUser = useUserStore((state) => state.setUser);
 
-  //initialize useStreak hook
   const { checkStreak, resetStreak } = useStreak();
 
-  //populate userStore on app launch and check whether this is an existing user profile
+  // auth + profile resolution
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(FB_auth, async (firebaseUser) => {
       setUserState(firebaseUser);
 
+      //user is found
       if (firebaseUser) {
         const userData = await getUser(firebaseUser.uid);
+        //user has profile to load
         if (userData) {
           loadUser(userData);
           setHasProfile(true);
-        } else {
+        }
+        //user does not profile yet
+        else {
           resetUserStore();
           setHasProfile(false);
         }
-      } else {
+      }
+      //user does not exist
+      else {
         resetUserStore();
-        setHasProfile(false); // known state: logged out, not "still checking"
+        setHasProfile(false);
       }
     });
     return unsubscribe;
   }, []);
 
-  //check the ootd post status
   useCheckDailyPost();
 
-  //check streak and update accordingly
+  //check streak
   useEffect(() => {
     if (!user.uid || user.lastPostDate === undefined) return;
 
     const { dayState } = checkStreak();
 
-    // avoid redundant writes if this already ran with the same result
     if (dayState !== user.dayState) {
       setUser("dayState", dayState);
     }
@@ -77,41 +77,37 @@ export default function Layout() {
     }
   }, [user.uid, user.lastPostDate]);
 
-  //redirect based on resolved auth + profile state
-  useEffect(() => {
-    //do nothing until these values are loaded in from firebase
-    if (userState === undefined || hasProfile === undefined) return;
-
-    //if user does not exist yet, take them to onboarding/(authentication)
-    if (!userState) {
-      router.replace("/(screens)/(authentication)");
-      return;
-    }
-
-    //user profile exists, take them to home screen
-    if (hasProfile) {
-      router.replace("/(tabs)");
-    } else {
-      //user profile exists but user has not completed onboarding yet (edge case). Take them to /username to complete the rest of onboarding
-      router.replace("/(screens)/(authentication)/username");
-    }
-  }, [userState, hasProfile]);
-
   const ready =
     (fontsLoaded || fontError) &&
     userState !== undefined &&
     hasProfile !== undefined;
 
+  // hide splash once ready
   useEffect(() => {
     if (ready) {
       SplashScreen.hideAsync();
     }
   }, [ready]);
 
-  if (!ready) return null; // splash stays up until fonts AND auth/profile are resolved
+  //navigate to specific screen based on the auth state (New user, registered but account not set up (edge case), signed in user)
+  useEffect(() => {
+    if (!ready) return;
+
+    if (!userState) {
+      router.replace("/(screens)/(authentication)");
+    } else if (!hasProfile) {
+      router.replace("/(screens)/(authentication)/username");
+    } else {
+      router.replace("/(tabs)");
+    }
+  }, [ready, userState, hasProfile]);
+
+  if (!ready) {
+    return null; //splash stays up while data loads
+  }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView>
       <SafeAreaProvider>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -121,4 +117,5 @@ export default function Layout() {
     </GestureHandlerRootView>
   );
 }
+
 const styles = StyleSheet.create({});

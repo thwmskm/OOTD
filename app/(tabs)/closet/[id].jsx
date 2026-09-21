@@ -1,4 +1,11 @@
-import { StyleSheet, View, Image, Pressable, Alert } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Image,
+  Pressable,
+  Alert,
+  ScrollView,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useState, useEffect } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -178,103 +185,105 @@ const Item = () => {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <View style={styles.header}>
-        <Pressable onPress={handleBack} hitSlop={12}>
-          <FontAwesome5 name="arrow-left" size={18} color={colors.ink} />
-        </Pressable>
-        <AppText weight="medium" style={styles.headerTitle}>
-          {type === "clothing" ? "Clothing item" : "Outfit"}
-        </AppText>
-        <View style={styles.headerActions}>
-          <Pressable onPress={handleEdit} hitSlop={10}>
-            <FontAwesome5 name="pencil-alt" size={15} color={colors.ink} />
+      <ScrollView>
+        <View style={styles.header}>
+          <Pressable onPress={handleBack} hitSlop={12}>
+            <FontAwesome5 name="arrow-left" size={18} color={colors.ink} />
           </Pressable>
-          <Pressable onPress={handleDelete} hitSlop={10}>
-            <FontAwesome5 name="trash" size={15} color={colors.textMuted} />
-          </Pressable>
-        </View>
-      </View>
-
-      <View style={styles.body}>
-        <Pressable onPress={pickImage} style={styles.frame}>
-          <Image
-            source={{
-              uri: type === "clothing" ? clothing.imageUrl : outfit.imageUrl,
-            }}
-            style={styles.image}
-            resizeMode="cover"
-          />
-          <View style={styles.replaceHint}>
-            <FontAwesome5 name="camera" size={12} color={colors.paper} />
+          <AppText weight="medium" style={styles.headerTitle}>
+            {type === "clothing" ? "Clothing item" : "Outfit"}
+          </AppText>
+          <View style={styles.headerActions}>
+            <Pressable onPress={handleEdit} hitSlop={10}>
+              <FontAwesome5 name="pencil-alt" size={15} color={colors.ink} />
+            </Pressable>
+            <Pressable onPress={handleDelete} hitSlop={10}>
+              <FontAwesome5 name="trash" size={15} color={colors.textMuted} />
+            </Pressable>
           </View>
-        </Pressable>
-
-        <View style={styles.card}>
-          {type === "clothing" ? (
-            <>
-              <AttributeRow
-                label="Colour"
-                isLast={false}
-                rightContent={
-                  clothing.colour ? (
-                    <View style={styles.colourValue}>
-                      <View
-                        style={[
-                          styles.swatch,
-                          { backgroundColor: colourHex },
-                          needsSwatchBorder && styles.swatchBordered,
-                        ]}
-                      />
-                      <AppText weight="medium" style={styles.value}>
-                        {clothing.colour}
-                      </AppText>
-                    </View>
-                  ) : undefined
-                }
-                value={!clothing.colour ? "—" : undefined}
-              />
-              <AttributeRow label="Brand" value={clothing.brand} />
-              <AttributeRow label="Material" value={clothing.material} />
-              <AttributeRow label="Season" value={clothing.season} />
-              <AttributeRow label="Type" value={clothing.type} />
-              <AttributeRow
-                label="Indoor / Outdoor"
-                value={clothing.inOut}
-                isLast
-              />
-            </>
-          ) : (
-            <>
-              <AttributeRow label="Style" value={outfit.style} />
-              <AttributeRow label="Season" value={outfit.season} />
-              <AttributeRow label="Occasion" value={outfit.occasion} isLast />
-            </>
-          )}
         </View>
 
-        {type === "outfit" ? (
-          <View style={styles.fieldGroup}>
-            <AppText weight="medium" style={styles.fieldLabel}>
-              Associated clothing
-            </AppText>
-            <View style={styles.clothingRow}>
-              {(outfit.clothingItems ?? []).length === 0 ? (
-                <AppText style={styles.fallbackText}>
-                  No clothing linked yet
-                </AppText>
-              ) : (
-                (outfit.clothingItems ?? []).map((clothingItem) => (
-                  <Image
-                    key={clothingItem.cid}
-                    source={{ uri: clothingItem.imageUrl }}
-                    style={styles.clothingThumb}
-                  />
-                ))
-              )}
+        <View style={styles.body}>
+          <Pressable onPress={pickImage} style={styles.frame}>
+            <Image
+              source={{
+                uri: type === "clothing" ? clothing.imageUrl : outfit.imageUrl,
+              }}
+              style={styles.image}
+              resizeMode="cover"
+            />
+            <View style={styles.replaceHint}>
+              <FontAwesome5 name="camera" size={12} color={colors.paper} />
             </View>
+          </Pressable>
+
+          <View style={styles.card}>
+            {type === "clothing" ? (
+              <>
+                <AttributeRow
+                  label="Colour"
+                  isLast={false}
+                  rightContent={
+                    clothing.colour ? (
+                      <View style={styles.colourValue}>
+                        <View
+                          style={[
+                            styles.swatch,
+                            { backgroundColor: colourHex },
+                            needsSwatchBorder && styles.swatchBordered,
+                          ]}
+                        />
+                        <AppText weight="medium" style={styles.value}>
+                          {clothing.colour}
+                        </AppText>
+                      </View>
+                    ) : undefined
+                  }
+                  value={!clothing.colour ? "—" : undefined}
+                />
+                <AttributeRow label="Brand" value={clothing.brand} />
+                <AttributeRow label="Material" value={clothing.material} />
+                <AttributeRow label="Season" value={clothing.season} />
+                <AttributeRow label="Type" value={clothing.type} />
+                <AttributeRow
+                  label="Indoor / Outdoor"
+                  value={clothing.inOut}
+                  isLast
+                />
+              </>
+            ) : (
+              <>
+                <AttributeRow label="Style" value={outfit.style} />
+                <AttributeRow label="Season" value={outfit.season} />
+                <AttributeRow label="Occasion" value={outfit.occasion} isLast />
+              </>
+            )}
           </View>
-        ) : null}
-      </View>
+
+          {type === "outfit" ? (
+            <View style={styles.fieldGroup}>
+              <AppText weight="medium" style={styles.fieldLabel}>
+                Associated clothing
+              </AppText>
+              <View style={styles.clothingRow}>
+                {(outfit.clothingItems ?? []).length === 0 ? (
+                  <AppText style={styles.fallbackText}>
+                    No clothing linked yet
+                  </AppText>
+                ) : (
+                  (outfit.clothingItems ?? []).map((clothingItem) => (
+                    <Image
+                      key={clothingItem.cid}
+                      source={{ uri: clothingItem.imageUrl }}
+                      style={styles.clothingThumb}
+                    />
+                  ))
+                )}
+              </View>
+            </View>
+          ) : null}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

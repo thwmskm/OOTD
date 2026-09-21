@@ -1,13 +1,9 @@
 // app/components/PfpCropper.jsx
 import React, { useState, useEffect, useRef } from "react";
-import {
-  View,
-  StyleSheet,
-  Image as RNImage,
-  Pressable,
-  Text,
-} from "react-native";
+import { View, StyleSheet, Image as RNImage, Pressable } from "react-native";
 import { captureRef } from "react-native-view-shot";
+import AppText from "./AppText";
+import { colors, spacing, radius } from "../../constants/theme";
 
 //Reusable circular crop UI. Pass an image uri, get back a cropped uri via onCropComplete.
 //Static center-crop for now — no drag/zoom.
@@ -90,17 +86,21 @@ const PfpCropper = ({
       <View style={styles.actions}>
         <Pressable
           onPress={handleCancel}
-          style={styles.actionBtn}
+          style={[styles.cancelBtn, busy && styles.btnDisabled]}
           disabled={busy}
         >
-          <Text style={styles.actionText}>Cancel</Text>
+          <AppText weight="medium" style={styles.cancelText}>
+            Cancel
+          </AppText>
         </Pressable>
         <Pressable
           onPress={handleSave}
-          style={styles.actionBtn}
+          style={[styles.saveBtn, busy && styles.btnDisabled]}
           disabled={busy}
         >
-          <Text style={styles.actionText}>{busy ? "Saving..." : "Save"}</Text>
+          <AppText weight="bold" style={styles.saveText}>
+            {busy ? "Saving..." : "Save"}
+          </AppText>
         </Pressable>
       </View>
     </View>
@@ -114,17 +114,33 @@ const styles = StyleSheet.create({
   frame: {
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "#f0ece4",
+    borderColor: colors.paper,
     alignItems: "center",
     justifyContent: "center",
   },
-  actions: { flexDirection: "row", gap: 20, marginTop: 20 },
-  actionBtn: {
-    padding: 10,
+  actions: { flexDirection: "row", gap: spacing.md, marginTop: spacing.lg },
+  cancelBtn: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: "#f0ece4",
+    borderColor: colors.paper,
   },
-  actionText: {
-    color: "#f0ece4",
+  cancelText: {
+    color: colors.paper,
+    fontSize: 15,
+  },
+  saveBtn: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    borderRadius: radius.md,
+    backgroundColor: colors.sage,
+  },
+  saveText: {
+    color: colors.paper,
+    fontSize: 15,
+  },
+  btnDisabled: {
+    opacity: 0.5,
   },
 });

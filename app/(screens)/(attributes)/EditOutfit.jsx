@@ -193,7 +193,7 @@ const EditOutfit = () => {
             Associated clothing
           </AppText>
           <Pressable
-            onPress={() => router.push({ pathname: "/linkClothing" })}
+            onPress={() => router.push({ pathname: "/LinkClothing" })}
             style={styles.clothingRow}
           >
             {loadStatus ? (

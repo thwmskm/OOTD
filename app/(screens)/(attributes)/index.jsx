@@ -20,9 +20,13 @@ const EditItem = () => {
 
   if (type === "clothing") {
     return <EditClothing cid={cid} imageUrl={imageUrl}></EditClothing>;
-  } else {
+  }
+  if (type === "outfit") {
     return <EditOutfit oid={oid} imageUrl={imageUrl}></EditOutfit>;
   }
+
+  console.warn("[(attributes)/index] reached with invalid type:", type);
+  return null;
 };
 
 export default EditItem;

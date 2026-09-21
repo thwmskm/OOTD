@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, Pressable, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../../database/firebase";
 import useUserStore from "../../../services/stores/userStore";
 import CalendarScroll from "../../components/CalendarScroll";
+import AppText from "../../components/AppText";
+import { FontAwesome5 } from "@expo/vector-icons";
+import { colors, spacing } from "../../../constants/theme";
 
 const CalendarView = () => {
   const router = useRouter();
@@ -73,18 +77,50 @@ const CalendarView = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <CalendarScroll
-        markedDates={markedDates}
-        onDayPress={handleDayPress}
-        onMonthChange={handleMonthChange}
-      />
-    </View>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <View style={styles.header}>
+        <Pressable onPress={() => router.back()} hitSlop={8}>
+          <FontAwesome5 name="arrow-left" size={20} color={colors.ink} />
+        </Pressable>
+        <AppText weight="bold" style={styles.headerTitle}>
+          Calendar
+        </AppText>
+        <View style={styles.headerSpacer} />
+      </View>
+
+      <View style={styles.container}>
+        <CalendarScroll
+          markedDates={markedDates}
+          onDayPress={handleDayPress}
+          onMonthChange={handleMonthChange}
+        />
+      </View>
+    </SafeAreaView>
   );
 };
 
 export default CalendarView;
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.paper,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  headerTitle: {
+    fontSize: 16,
+    color: colors.ink,
+  },
+  headerSpacer: {
+    width: 20,
+  },
+  container: {
+    flex: 1,
+  },
 });
