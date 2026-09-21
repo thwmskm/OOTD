@@ -73,7 +73,7 @@ const Profile = () => {
   const statRows = [
     [
       { label: "OOTDs Posted", value: userStats?.totalOOTDs ?? 0 },
-      { label: "Closet Items", value: userStats?.totalItems ?? 0 },
+      { label: "Clothing Items", value: userStats?.totalItems ?? 0 },
     ],
     [
       { label: "Top Style", value: topStyle ? topStyle[0] : "-" },
@@ -175,6 +175,9 @@ const Profile = () => {
           </View>
         )}
 
+        <AppText weight="bold" style={styles.statHeader}>
+          Style Stats
+        </AppText>
         <View style={styles.statSect}>
           {statRows.map((row, rowIndex) => (
             <View
@@ -277,7 +280,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     backgroundColor: colors.sage,
     paddingVertical: spacing.md,
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
   },
   streakTitle: {
     fontSize: 12,
@@ -291,6 +294,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-evenly",
+  },
+  statHeader: {
+    fontSize: 12,
+    color: colors.ink,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+    textAlign: "center",
+    marginBottom: spacing.sm,
   },
   statSect: {
     borderRadius: radius.lg,

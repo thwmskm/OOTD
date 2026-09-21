@@ -289,25 +289,29 @@ const OOTDView = () => {
       <View style={styles.detailPanel}>
         <View style={styles.tagRow}>
           {ootd.style ? (
-            <View style={styles.tag}>
+            <View style={[styles.tag, styles.styleTag]}>
+              <AppText weight="medium" style={styles.tagLabel}>
+                Style :
+              </AppText>
               <AppText weight="medium" style={styles.tagText}>
                 {ootd.style}
               </AppText>
             </View>
           ) : null}
-
-          {(ootd.colourScheme ?? []).map((label) => {
-            const hex =
-              COLOURS.find((c) => c.label === label)?.hex ?? colors.line;
-            return (
-              <View key={label} style={styles.tag}>
-                <View style={[styles.tagSwatch, { backgroundColor: hex }]} />
-                <AppText weight="medium" style={styles.tagText}>
-                  {label}
-                </AppText>
-              </View>
-            );
-          })}
+          <View style={styles.colorTagRow}>
+            {(ootd.colourScheme ?? []).map((label) => {
+              const hex =
+                COLOURS.find((c) => c.label === label)?.hex ?? colors.line;
+              return (
+                <View key={label} style={styles.tag}>
+                  <View style={[styles.tagSwatch, { backgroundColor: hex }]} />
+                  <AppText weight="medium" style={styles.tagText}>
+                    {label}
+                  </AppText>
+                </View>
+              );
+            })}
+          </View>
         </View>
 
         {!canEdit ? (
@@ -395,9 +399,13 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   tagRow: {
-    flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.sm,
+  },
+  colorTagRow: {
+    flexDirection: "row",
+    gap: spacing.sm,
+    flexWrap: "wrap",
   },
   tag: {
     flexDirection: "row",
@@ -407,6 +415,15 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
+  },
+  styleTag: {
+    alignSelf: "flex-start",
+  },
+  tagLabel: {
+    fontSize: 12,
+    color: colors.textMuted,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   tagSwatch: {
     width: 12,

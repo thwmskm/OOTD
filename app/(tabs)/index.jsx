@@ -136,9 +136,19 @@ const Home = () => {
         </View>
 
         <View style={styles.streakWrap} pointerEvents="none">
-          <AppText weight="medium" style={styles.streakValue}>
-            {user?.streak ?? "--"}
-          </AppText>
+          {!ootd.imageUrl ? (
+            <View style={styles.streakBadgeNotPosted}>
+              <AppText weight="bold" style={styles.streakValueNotPosted}>
+                {user?.streak ?? "--"}
+              </AppText>
+            </View>
+          ) : (
+            <View style={styles.streakBadgePosted}>
+              <AppText weight="bold" style={styles.streakValuePosted}>
+                {user?.streak ?? "--"}
+              </AppText>
+            </View>
+          )}
         </View>
       </View>
 
@@ -208,7 +218,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.lg,
     position: "relative",
   },
   headerLeft: {
@@ -226,9 +236,35 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  streakValue: {
-    fontSize: 13,
-    color: colors.ink,
+  streakBadgePosted: {
+    minWidth: 36,
+    minHeight: 36,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.sm,
+    borderWidth: 2,
+    borderColor: colors.sage,
+    backgroundColor: colors.surface,
+  },
+  streakBadgeNotPosted: {
+    minWidth: 36,
+    minHeight: 36,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.sm,
+    borderWidth: 2,
+    borderColor: colors.textMuted,
+    backgroundColor: colors.surface,
+  },
+  streakValuePosted: {
+    fontSize: 16,
+    color: colors.sage,
+  },
+  streakValueNotPosted: {
+    fontSize: 16,
+    color: colors.sage,
   },
   logo: {
     fontSize: 18,

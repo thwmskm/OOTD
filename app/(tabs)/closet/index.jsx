@@ -90,53 +90,62 @@ const ClosetIndex = () => {
     tabs === "clothing" ? sort.sortedItems.length : outfitItems.length;
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <View style={styles.header}>
-        <AppText weight="bold" style={styles.title}>
-          Closet
-        </AppText>
-        <AppText weight="regular" style={styles.count}>
-          {activeCount} {tabs === "clothing" ? "items" : "outfits"}
-        </AppText>
-      </View>
+    <View style={styles.root}>
+      <SafeAreaView style={styles.safeArea} edges={["top"]}>
+        <View style={styles.header}>
+          <AppText weight="bold" style={styles.title}>
+            Closet
+          </AppText>
+          <AppText weight="regular" style={styles.count}>
+            {activeCount} {tabs === "clothing" ? "items" : "outfits"}
+          </AppText>
+        </View>
 
-      <View style={styles.segmented}>
-        {TABS.map(({ key, label }) => {
-          const active = tabs === key;
-          return (
-            <Pressable
-              key={key}
-              onPress={() => setTabs(key)}
-              style={[styles.segment, active && styles.segmentActive]}
-            >
-              <AppText
-                weight="medium"
-                style={[styles.segmentText, active && styles.segmentTextActive]}
+        <View style={styles.segmented}>
+          {TABS.map(({ key, label }) => {
+            const active = tabs === key;
+            return (
+              <Pressable
+                key={key}
+                onPress={() => setTabs(key)}
+                style={[styles.segment, active && styles.segmentActive]}
               >
-                {label}
-              </AppText>
-            </Pressable>
-          );
-        })}
-      </View>
+                <AppText
+                  weight="medium"
+                  style={[
+                    styles.segmentText,
+                    active && styles.segmentTextActive,
+                  ]}
+                >
+                  {label}
+                </AppText>
+              </Pressable>
+            );
+          })}
+        </View>
 
-      {tabs === "clothing" && <ClosetFilterBar filter={filter} sort={sort} />}
+        {tabs === "clothing" && <ClosetFilterBar filter={filter} sort={sort} />}
 
-      <View style={styles.body}>
-        <GridView
-          tab={tabs}
-          items={tabs === "clothing" ? sort.sortedItems : outfitItems}
-          onItemPress={handleItemPress}
-        />
-        <FloatButton onCreate={handlePickClothing} />
-      </View>
-    </SafeAreaView>
+        <View style={styles.body}>
+          <GridView
+            tab={tabs}
+            items={tabs === "clothing" ? sort.sortedItems : outfitItems}
+            onItemPress={handleItemPress}
+          />
+        </View>
+      </SafeAreaView>
+      <FloatButton onCreate={handlePickClothing} />
+    </View>
   );
 };
 
 export default ClosetIndex;
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: colors.paper,
+  },
   safeArea: {
     flex: 1,
     backgroundColor: colors.paper,

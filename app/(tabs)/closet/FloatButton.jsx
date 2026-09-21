@@ -65,10 +65,10 @@ const CIRCLE_SIZE = 56;
 const styles = StyleSheet.create({
   main: {
     position: "absolute",
-    bottom: spacing.lg,
-    right: spacing.lg,
-    alignItems: "flex-end",
-    zIndex: 999, // must be higher than mask's zIndex so menu taps land correctly
+    bottom: 40,
+    right: 20,
+    width: 180,
+    zIndex: 20,
   },
   circle: {
     width: CIRCLE_SIZE,
@@ -77,6 +77,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.sage,
     alignItems: "center",
     justifyContent: "center",
+    alignSelf: "flex-end",
     zIndex: 999,
     // soft shadow so it reads as floating above the grid
     shadowColor: colors.ink,
@@ -89,15 +90,17 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
   menu: {
-    marginBottom: spacing.sm,
-    gap: spacing.xs + 2,
+    marginBottom: spacing.md,
+    gap: spacing.sm,
     alignItems: "flex-end",
   },
   menuItem: {
+    minWidth: 160,
+    alignItems: "center",
     backgroundColor: colors.paper,
     borderRadius: radius.md,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
     shadowColor: colors.ink,
     shadowOpacity: 0.1,
     shadowRadius: 6,
@@ -105,16 +108,12 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   menuItemText: {
-    fontSize: 13,
+    fontSize: 16,
     color: colors.ink,
   },
   mask: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(43, 42, 40, 0.15)", // ink at low opacity, matches your overlay pattern elsewhere
-    zIndex: 998,
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 10,
+    backgroundColor: "rgba(0,0,0,0.25)",
   },
 });
