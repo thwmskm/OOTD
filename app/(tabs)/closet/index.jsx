@@ -4,7 +4,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useRouter, useFocusEffect } from "expo-router";
 import { useImagePicker } from "../../hooks/useImagePicker";
 import useClosetFilter from "../../hooks/useClosetFilter";
-import useClosetSort from "../../hooks/useClosetSort";
+import useOutfitFilter from "../../hooks/useOutfitFilter";
+import useClosetSort, { OUTFIT_SORT_OPTIONS } from "../../hooks/useClosetSort";
 import useUserStore from "../../../services/stores/userStore";
 import { db } from "../../../database/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
@@ -29,6 +30,12 @@ const ClosetIndex = () => {
 
   const filter = useClosetFilter(clothingItems);
   const sort = useClosetSort(filter.filteredItems);
+
+  const outfitFilter = useOutfitFilter(outfitItems);
+  const outfitSort = useClosetSort(
+    outfitFilter.filteredItems,
+    OUTFIT_SORT_OPTIONS,
+  );
 
   const fetchClothings = async () => {
     try {
@@ -87,7 +94,9 @@ const ClosetIndex = () => {
   };
 
   const activeCount =
-    tabs === "clothing" ? sort.sortedItems.length : outfitItems.length;
+    tabs === "clothing"
+      ? sort.sortedItems.length
+      : outfitSort.sortedItems.length;
 
   return (
     <View style={styles.root}>
@@ -97,7 +106,7 @@ const ClosetIndex = () => {
             Closet
           </AppText>
           <AppText weight="regular" style={styles.count}>
-            {activeCount} {tabs === "clothing" ? "items" : "outfits"}
+            {activeCount} {tabs === "clothing" ? "item(s)" : "outfit(s)"}
           </AppText>
         </View>
 
@@ -124,12 +133,19 @@ const ClosetIndex = () => {
           })}
         </View>
 
-        {tabs === "clothing" && <ClosetFilterBar filter={filter} sort={sort} />}
+        <ClosetFilterBar
+          key={tabs}
+          tab={tabs}
+          filter={tabs === "clothing" ? filter : outfitFilter}
+          sort={tabs === "clothing" ? sort : outfitSort}
+        />
 
         <View style={styles.body}>
           <GridView
             tab={tabs}
-            items={tabs === "clothing" ? sort.sortedItems : outfitItems}
+            items={
+              tabs === "clothing" ? sort.sortedItems : outfitSort.sortedItems
+            }
             onItemPress={handleItemPress}
           />
         </View>

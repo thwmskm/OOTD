@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
   },
   streakValueNotPosted: {
     fontSize: 16,
-    color: colors.sage,
+    color: colors.textMuted,
   },
   logo: {
     fontSize: 18,

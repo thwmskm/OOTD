@@ -1,8 +1,7 @@
 // hooks/useClosetSort.ts
-// hook to sort a (typically already-filtered) list of clothing items
-// composes after useClosetFilter: pass filteredItems in, get sortedItems out
+// hook to sort a (typically already-filtered) list of clothing items or outfits
+// composes after useClosetFilter/useOutfitFilter: pass filteredItems in, get sortedItems out
 import { useState, useMemo, useCallback } from "react";
-import { Clothing } from "../../models/Clothing";
 
 export type ClosetSortOption = "recent" | "oldest" | "mostWorn";
 
@@ -12,7 +11,19 @@ const SORT_OPTIONS: { value: ClosetSortOption; label: string }[] = [
   { value: "mostWorn", label: "Most Worn" },
 ];
 
-const useClosetSort = (items: Clothing[]) => {
+//outfits have no wear tracking, so mostWorn is dropped for them
+export const OUTFIT_SORT_OPTIONS = SORT_OPTIONS.filter(
+  (o) => o.value !== "mostWorn",
+);
+
+//Firestore returns createdAt as a Timestamp, not a Date
+const toMs = (d: any): number =>
+  d?.toDate ? d.toDate().getTime() : new Date(d).getTime();
+
+const useClosetSort = <T extends { createdAt: any }>(
+  items: T[],
+  sortOptions = SORT_OPTIONS,
+) => {
   const [sortBy, setSortBy] = useState<ClosetSortOption>("recent");
 
   //sort the given items by the active sortBy option
@@ -22,16 +33,10 @@ const useClosetSort = (items: Clothing[]) => {
 
     switch (sortBy) {
       case "recent":
-        return list.sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        );
+        return list.sort((a, b) => toMs(b.createdAt) - toMs(a.createdAt));
 
       case "oldest":
-        return list.sort(
-          (a, b) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-        );
+        return list.sort((a, b) => toMs(a.createdAt) - toMs(b.createdAt));
 
       case "mostWorn":
         // NOTE: wearCount isn't tracked on Clothing yet.
@@ -54,7 +59,7 @@ const useClosetSort = (items: Clothing[]) => {
     sortBy,
     setSort,
     sortedItems,
-    sortOptions: SORT_OPTIONS,
+    sortOptions,
   };
 };
 

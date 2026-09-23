@@ -1,6 +1,7 @@
 // app/(tabs)/closet/ClosetFilterBar.jsx
-// horizontal pill row (colour/type/season/inOut/brand/material) + sort icon
-// tapping a pill opens a popover with that category's chips (or search+chips for brand/material)
+// horizontal pill row + sort icon
+// clothing tab: colour/type/season/inOut/brand/material, outfit tab: season/style/occasion
+// tapping a pill opens a popover with that category's chips (or search+chips for brand/material/style/occasion)
 // only one popover open at a time; tapping outside closes it
 import React, { useState } from "react";
 import {
@@ -14,7 +15,7 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import AppText from "../../components/AppText";
 import { colors, spacing, radius } from "../../../constants/theme";
 
-const CATEGORIES = [
+const CLOTHING_CATEGORIES = [
   { key: "colour", label: "Colour" },
   { key: "type", label: "Type" },
   { key: "season", label: "Season" },
@@ -23,8 +24,16 @@ const CATEGORIES = [
   { key: "material", label: "Material" },
 ];
 
-const ClosetFilterBar = ({ filter, sort }) => {
+const OUTFIT_CATEGORIES = [
+  { key: "season", label: "Season" },
+  { key: "style", label: "Style" },
+  { key: "occasion", label: "Occasion" },
+];
+
+const ClosetFilterBar = ({ tab, filter, sort }) => {
   const [activePopover, setActivePopover] = useState(null);
+
+  const categories = tab === "outfit" ? OUTFIT_CATEGORIES : CLOTHING_CATEGORIES;
 
   const categoryConfig = {
     colour: {
@@ -67,6 +76,22 @@ const ClosetFilterBar = ({ filter, sort }) => {
       query: filter.filters.materialQuery,
       setQuery: filter.setMaterialQuery,
     },
+    style: {
+      available: filter.availableStyles,
+      selected: filter.filters.selectedStyles,
+      toggle: filter.toggleStyle,
+      count: filter.activeCounts.style,
+      query: filter.filters.styleQuery,
+      setQuery: filter.setStyleQuery,
+    },
+    occasion: {
+      available: filter.availableOccasions,
+      selected: filter.filters.selectedOccasions,
+      toggle: filter.toggleOccasion,
+      count: filter.activeCounts.occasion,
+      query: filter.filters.occasionQuery,
+      setQuery: filter.setOccasionQuery,
+    },
   };
 
   const togglePopover = (key) => {
@@ -86,7 +111,7 @@ const ClosetFilterBar = ({ filter, sort }) => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.pillRow}
         >
-          {CATEGORIES.map((cat) => {
+          {categories.map((cat) => {
             const config = categoryConfig[cat.key];
             const isActive = activePopover === cat.key;
             const hasSelections = config.count > 0;
@@ -190,7 +215,7 @@ const ClosetFilterBar = ({ filter, sort }) => {
             ) : (
               <>
                 <AppText weight="medium" style={styles.popoverTitle}>
-                  {CATEGORIES.find((c) => c.key === activePopover)?.label}
+                  {categories.find((c) => c.key === activePopover)?.label}
                 </AppText>
 
                 {activeCategory.query !== undefined && (
