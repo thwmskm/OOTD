@@ -54,4 +54,4 @@ The application follows a cloud-connected mobile architecture:
 
 ---
 
-💫 **Your style. Your day. Your one and only.**
+💫 **Make it yours, with YU*YL**
