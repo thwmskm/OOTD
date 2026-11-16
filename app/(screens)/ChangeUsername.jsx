@@ -4,9 +4,11 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import useUserStore from "../../services/stores/userStore";
 import { updateUser } from "../../services/userService";
+import { guardRateLimit } from "../../services/rateLimit";
 import { FontAwesome5 } from "@expo/vector-icons";
 import AppText from "../components/AppText";
 import { colors, spacing, radius } from "../../constants/theme";
+import { serverTimestamp } from "firebase/firestore";
 
 const ChangeUsername = () => {
   const router = useRouter();
@@ -44,8 +46,14 @@ const ChangeUsername = () => {
       return;
     }
 
+    // 14-day cooldown (after validation so invalid attempts don't use it up)
+    if (!(await guardRateLimit("usernameChange", user.uid))) return;
+
     try {
-      await updateUser(user.uid, { username: trimmed });
+      await updateUser(user.uid, {
+        username: trimmed,
+        usernameChangedAt: serverTimestamp(),
+      });
       setUser("username", trimmed);
       router.back();
     } catch (error) {

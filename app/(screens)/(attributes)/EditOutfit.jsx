@@ -21,6 +21,7 @@ import AppText from "../../components/AppText";
 import AppButton from "../../components/AppButton";
 import AttributeRow from "../../components/AttributeRow";
 import { colors, spacing, radius } from "../../../constants/theme";
+import { guardRateLimit } from "../../../services/rateLimiter.js";
 
 const EditOutfit = () => {
   const router = useRouter();
@@ -75,6 +76,8 @@ const EditOutfit = () => {
         router.back();
       } else {
         const newOid = uuid.v4().toString();
+        //rate limit
+        if (!(await guardRateLimit("outiftUpload", user.uid))) return;
         const downloadUrl = await storeOutfit(imageUrl, newOid, user.uid);
 
         const newOutfit = {

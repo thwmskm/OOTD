@@ -18,6 +18,7 @@ import {
 import AppText from "../components/AppText";
 import AppButton from "../components/AppButton";
 import { colors, spacing, radius } from "../../constants/theme";
+import { guardRateLimit } from "../../services/rateLimiter";
 
 const Home = () => {
   const router = useRouter();
@@ -67,6 +68,10 @@ const Home = () => {
     if (!user) return;
 
     const newId = `${user.uid}_${date}`;
+
+    //rate limiter for uploads
+    if (!(await guardRateLimit("ootdUpload", user.uid))) return;
+
     const downloadUrl = await storeOOTD(url, newId, user.uid);
 
     const newOOTD = {

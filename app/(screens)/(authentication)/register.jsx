@@ -3,6 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { FB_auth } from "../../../database/firebase";
+import { guardRateLimit } from "../../../services/rateLimit";
 import { useState } from "react";
 import AppText from "../../components/AppText";
 import AppButton from "../../components/AppButton";
@@ -15,6 +16,9 @@ export default function Register() {
   const [password, setPassword] = useState("");
 
   const signUp = async () => {
+    //3 sign-ups per hour per device (no uid yet, and keying by email is trivially bypassed)
+    if (!(await guardRateLimit("signUp", "device"))) return;
+
     try {
       await createUserWithEmailAndPassword(FB_auth, email, password);
       router.replace("/username");

@@ -1,14 +1,19 @@
 import { db } from  "../database/firebase.js";
-import { collection, doc, setDoc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import { collection, doc, setDoc, getDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp } from "firebase/firestore";
 import { Outfit } from "../models/Outfit.js";
 
 const outfitCollection = collection(db, "outfits");
 
 //Creating Outfit
+//Batched with a users/{uid}.lastOutfitAt stamp, which the Firestore rules require
 export const createOutfit = async (outfit: Outfit) => {
     try {
-        const outfitRef = doc(outfitCollection, outfit.oid);
-        await setDoc(outfitRef, outfit);
+        const batch = writeBatch(db);
+        batch.set(doc(outfitCollection, outfit.oid), outfit);
+        batch.update(doc(db, "users", outfit.uid), {
+            lastOutfitAt: serverTimestamp(),
+        });
+        await batch.commit();
         console.log("Outfit Creation Success!");
     } catch (error) {
         console.error("Error while creating outfit: ", error);

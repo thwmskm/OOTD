@@ -8,6 +8,7 @@ import { useImagePicker } from "../hooks/useImagePicker";
 import PfpCropper from "../components/PfpCropper";
 import { storePfp } from "../../services/Storage";
 import { updateUser } from "../../services/userService";
+import { guardRateLimit } from "../../services/rateLimit";
 import AppText from "../components/AppText";
 import AppButton from "../components/AppButton";
 import { colors, spacing, radius } from "../../constants/theme";
@@ -29,10 +30,17 @@ const EditProfile = () => {
   //After crop is confirmed: upload to storage, persist to Firestore, sync store
   const handleCropComplete = async (croppedUri) => {
     if (!user?.uid) return;
+    //rate limiting
+    if (!(await guardRateLimit("pfpChange", user.uid))) return;
     setSaving(true);
     try {
       const downloadUrl = await storePfp(croppedUri, user.uid);
-      await updateUser(user.uid, { pfp: downloadUrl });
+      const versionedUrl = `${downloadUrl}&v=${Date.now()}`;
+      await updateUser(user.uid, {
+        pfp: versionedUrl,
+        pfpChangedAt: serverTimestamp(),
+      });
+      setUser("pfp", versionedUrl);
       setUser("pfp", downloadUrl);
     } catch (error) {
       console.error("Error while saving new pfp", error);

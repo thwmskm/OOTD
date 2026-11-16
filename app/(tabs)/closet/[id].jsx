@@ -34,6 +34,7 @@ import {
 import AppText from "../../components/AppText";
 import AttributeRow from "../../components/AttributeRow";
 import { colors, spacing, radius } from "../../../constants/theme";
+import { guardRateLimit } from "../../../services/rateLimiter";
 
 const Item = () => {
   const router = useRouter();
@@ -123,6 +124,8 @@ const Item = () => {
   };
 
   const onImagePicked = async (uri) => {
+    //rate limiting
+    if (!(await guardRateLimit("imageReplace", user.uid))) return;
     if (type === "clothing") {
       try {
         if (clothing.imageUrl) await deleteImage(clothing.imageUrl);
