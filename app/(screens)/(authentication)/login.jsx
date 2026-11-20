@@ -9,7 +9,7 @@ import {
 import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { FB_auth } from "../../../database/firebase";
-import { guardRateLimit } from "../../../services/rateLimit";
+import { guardRateLimit } from "../../../services/rateLimiter";
 import { useState } from "react";
 
 export default function Login() {

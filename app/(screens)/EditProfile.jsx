@@ -8,10 +8,11 @@ import { useImagePicker } from "../hooks/useImagePicker";
 import PfpCropper from "../components/PfpCropper";
 import { storePfp } from "../../services/Storage";
 import { updateUser } from "../../services/userService";
-import { guardRateLimit } from "../../services/rateLimit";
+import { guardRateLimit } from "../../services/rateLimiter";
 import AppText from "../components/AppText";
 import AppButton from "../components/AppButton";
 import { colors, spacing, radius } from "../../constants/theme";
+import { serverTimestamp } from "firebase/firestore";
 
 const EditProfile = () => {
   const router = useRouter();
@@ -31,7 +32,10 @@ const EditProfile = () => {
   const handleCropComplete = async (croppedUri) => {
     if (!user?.uid) return;
     //rate limiting
-    if (!(await guardRateLimit("pfpChange", user.uid))) return;
+    if (!(await guardRateLimit("pfpChange", user.uid))) {
+      setRawUri(null); // close the cropper so the user isn't stuck in the saving state
+      return;
+    }
     setSaving(true);
     try {
       const downloadUrl = await storePfp(croppedUri, user.uid);
@@ -41,7 +45,6 @@ const EditProfile = () => {
         pfpChangedAt: serverTimestamp(),
       });
       setUser("pfp", versionedUrl);
-      setUser("pfp", downloadUrl);
     } catch (error) {
       console.error("Error while saving new pfp", error);
     } finally {

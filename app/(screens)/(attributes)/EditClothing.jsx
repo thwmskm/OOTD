@@ -29,7 +29,7 @@ import AppText from "../../components/AppText";
 import AppButton from "../../components/AppButton";
 import AttributeRow from "../../components/AttributeRow";
 import { colors, spacing, radius } from "../../../constants/theme";
-import { guardRateLimit } from "../../../services/rateLimiter.js";
+import { guardRateLimit } from "../../../services/rateLimiter.ts";
 
 const EditClothing = () => {
   const router = useRouter();

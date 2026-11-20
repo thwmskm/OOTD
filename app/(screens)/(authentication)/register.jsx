@@ -3,7 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { FB_auth } from "../../../database/firebase";
-import { guardRateLimit } from "../../../services/rateLimit";
+import { guardRateLimit } from "../../../services/rateLimiter";
 import { useState } from "react";
 import AppText from "../../components/AppText";
 import AppButton from "../../components/AppButton";

@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import useUserStore from "../../services/stores/userStore";
 import { updateUser } from "../../services/userService";
-import { guardRateLimit } from "../../services/rateLimit";
+import { guardRateLimit } from "../../services/rateLimiter";
 import { FontAwesome5 } from "@expo/vector-icons";
 import AppText from "../components/AppText";
 import { colors, spacing, radius } from "../../constants/theme";
