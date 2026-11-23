@@ -4,7 +4,11 @@ import React, { useState, useEffect } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { getOOTD } from "../../../services/ootdService";
-import { interpretWeatherCode } from "../../../services/weatherService";
+import useUserStore from "../../../services/stores/userStore";
+import {
+  interpretWeatherCode,
+  formatTemp,
+} from "../../../services/weatherService";
 import AppText from "../../components/AppText";
 import { colors, spacing, radius } from "../../../constants/theme";
 
@@ -12,6 +16,8 @@ import { colors, spacing, radius } from "../../../constants/theme";
 const OOTDDetails = () => {
   const router = useRouter();
   const { id } = useLocalSearchParams();
+  const user = useUserStore((state) => state.user);
+  const { tempUnit } = user.preferences;
 
   const [loading, setLoading] = useState(false);
 
@@ -76,7 +82,8 @@ const OOTDDetails = () => {
             </View>
             {weather !== undefined && (
               <AppText weight="regular" style={styles.weatherText}>
-                {temp}°C · {interpretWeatherCode(weather).emoji}{" "}
+                {formatTemp(temp, tempUnit)}°{tempUnit} ·{" "}
+                {interpretWeatherCode(weather).emoji}{" "}
                 {interpretWeatherCode(weather).label}
               </AppText>
             )}

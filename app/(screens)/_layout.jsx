@@ -24,6 +24,10 @@ export default function Layout() {
         options={{ headerShown: false }}
       />
       <Stack.Screen name="(settings)/info" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="(settings)/TempUnitChange"
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }

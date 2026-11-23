@@ -81,7 +81,11 @@ const Settings = () => {
           </AppText>
           <Row label="Turn off Saves" />
           <Row label="Notifications" />
-          <Row label="Temperature Unit" last />
+          <Row
+            label="Temperature Unit"
+            onPress={() => router.push("/TempUnitChange")}
+            last
+          />
         </View>
 
         <View style={styles.sections}>

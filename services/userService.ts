@@ -1,6 +1,6 @@
 import { db } from  "../database/firebase.js";
 import { collection, doc, setDoc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
-import { User } from "../models/User.js";
+import { User, UserPreferences } from "../models/User.js";
 
 const userCollection = collection(db, "users");
 
@@ -41,7 +41,27 @@ export const updateUser = async (uid: string, updates: Partial<User>) => {
         await updateDoc(userRef, updates);
         console.log("User Update Success!");
     } catch (error) {
-        console.error("Error while updating user: ", error);
+        console.log("Error while updating user: ", error);
+    }
+};
+
+
+//Update user preferences.
+//Uses dot paths ("preferences.tempUnit") so sibling preferences aren't overwritten.
+//Rethrows on failure so callers can revert optimistic store updates.
+export const updateUserPreferences = async (
+    uid: string,
+    updates: Partial<UserPreferences>
+) => {
+    try {
+        const userRef = doc(db, "users", uid);
+        const fields = Object.fromEntries(
+            Object.entries(updates).map(([key, value]) => [`preferences.${key}`, value])
+        );
+        await updateDoc(userRef, fields);
+        console.log("User preferences update success!");
+    } catch (error) {
+        console.error("Error while updating user preferences: ", error);
         throw error;
     }
 };
@@ -55,6 +75,5 @@ export const deleteUser = async (uid: string) => {
     console.log("User deleted successfully");
   } catch (error) {
     console.error("Error deleting user:", error);
-    throw error;
   }
 };

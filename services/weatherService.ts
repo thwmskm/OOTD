@@ -1,4 +1,5 @@
 // services/weatherService.ts
+import type { TempUnit } from '../models/User';
 
 export interface DailyForecast {
   date: string; // YYYY-MM-DD
@@ -31,6 +32,15 @@ export const interpretWeatherCode = (code: number): { label: string; emoji: stri
   if (code <= 86)           return { label: 'Snow Showers', emoji: '🌨️' };
   if (code <= 99)           return { label: 'Thunderstorm', emoji: '⛈️' };
   return { label: 'Unknown', emoji: '🌡️' };
+};
+
+// Temperatures are always fetched and stored in Celsius; convert only for display
+export const formatTemp = (
+  celsius: number | null | undefined,
+  unit: TempUnit
+): number | null => {
+  if (typeof celsius !== 'number') return null;
+  return unit === 'F' ? Math.round((celsius * 9) / 5 + 32) : celsius;
 };
 
 export const fetchWeatherForecast = async (

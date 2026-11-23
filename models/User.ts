@@ -1,3 +1,10 @@
+export type TempUnit = "C" | "F";
+
+export interface UserPreferences {
+    tempUnit: TempUnit;
+    savesEnabled: boolean;
+}
+
 export interface User {
     uid: string;
     email: string;
@@ -7,5 +14,6 @@ export interface User {
     streak: number;
     MaxStreak: number;
     lastPostDate: string | null;
+    preferences: UserPreferences;
     createdAt: Date;
 }

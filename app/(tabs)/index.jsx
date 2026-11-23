@@ -9,7 +9,10 @@ import { createOOTD } from "../../services/ootdService";
 import useStreak from "../hooks/useStreak";
 import useUserStore from "../../services/stores/userStore";
 import useWeather from "../hooks/useWeather";
-import { interpretWeatherCode } from "../../services/weatherService";
+import {
+  interpretWeatherCode,
+  formatTemp,
+} from "../../services/weatherService";
 import {
   incrementTotalOOTDs,
   incrementStatCounts,
@@ -31,6 +34,7 @@ const Home = () => {
 
   //userStore initialization
   const user = useUserStore((state) => state.user);
+  const { tempUnit } = user.preferences;
   const { updateStreak } = useStreak();
 
   //ootdStore initialization
@@ -164,7 +168,7 @@ const Home = () => {
               {isLoading
                 ? "Checking today's weather..."
                 : current
-                  ? `${emoji}  ${current.temp}°C right now`
+                  ? `${emoji}  ${formatTemp(current.temp, tempUnit)}°${tempUnit} right now`
                   : "No post yet today"}
             </AppText>
             <AppButton
@@ -191,7 +195,9 @@ const Home = () => {
               </View>
               <View style={styles.pill}>
                 <AppText weight="medium" style={styles.pillText}>
-                  {isLoading ? "—" : `${emoji} ${current?.temp ?? "--"}°`}
+                  {isLoading
+                    ? "—"
+                    : `${emoji} ${formatTemp(current?.temp, tempUnit) ?? "--"}°${tempUnit}`}
                 </AppText>
               </View>
             </View>

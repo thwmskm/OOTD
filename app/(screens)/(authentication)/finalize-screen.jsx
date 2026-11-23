@@ -10,6 +10,7 @@ import AppText from "../../components/AppText";
 import AppButton from "../../components/AppButton";
 import { colors, spacing } from "../../../constants/theme";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { DEFAULT_PREFERENCES } from "../../../services/stores/userStore";
 
 const FinalizeScreen = () => {
   const router = useRouter();
@@ -18,21 +19,23 @@ const FinalizeScreen = () => {
 
   const CreateAndContinue = async () => {
     const userId = FB_auth.currentUser.uid;
-    const downloadUrl = pfp ? await storePfp(pfp, userId) : "";
-
-    const newUser = {
-      uid: userId,
-      email: FB_auth.currentUser.email,
-      username: username,
-      provider: "email",
-      pfp: downloadUrl,
-      streak: 0,
-      MaxStreak: 0,
-      lastPostDate: null,
-      createdAt: new Date(),
-    };
 
     try {
+      const downloadUrl = pfp ? await storePfp(pfp, userId) : "";
+
+      const newUser = {
+        uid: userId,
+        email: FB_auth.currentUser.email,
+        username: username,
+        provider: "email",
+        pfp: downloadUrl,
+        streak: 0,
+        MaxStreak: 0,
+        lastPostDate: null,
+        preferences: DEFAULT_PREFERENCES,
+        createdAt: new Date(),
+      };
+
       await createUser(newUser);
       await createUserStats({
         uid: userId,
