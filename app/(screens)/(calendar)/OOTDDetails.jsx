@@ -55,9 +55,9 @@ const OOTDDetails = () => {
         <Pressable onPress={() => router.back()} hitSlop={8}>
           <FontAwesome5 name="arrow-left" size={20} color={colors.ink} />
         </Pressable>
-        <AppText weight="bold" style={styles.headerTitle}>
+        {/*<AppText weight="bold" style={styles.headerTitle}>
           OOTD
-        </AppText>
+        </AppText>*/}
         <View style={styles.headerSpacer} />
       </View>
 

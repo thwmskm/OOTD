@@ -12,6 +12,10 @@ export default function Layout() {
       <Stack.Screen name="WeeklyStrip" options={{ headerShown: false }} />
       <Stack.Screen name="EditProfile" options={{ headerShown: false }} />
       <Stack.Screen
+        name="(calendar)/OOTDDetails"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
         name="(calendar)/CalendarView"
         options={{ headerShown: false }}
       />
