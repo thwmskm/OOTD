@@ -71,7 +71,11 @@ const Settings = () => {
           </AppText>
           <Row label="Info" onPress={() => router.push("/info")} />
           <Row label="Account Privacy" />
-          <Row label="Delete Account" danger />
+          <Row
+            label="Delete Account"
+            onPress={() => router.push("/deleteAccount")}
+            danger
+          />
           <Row label="Logout" onPress={handleLogout} danger last />
         </View>
 
