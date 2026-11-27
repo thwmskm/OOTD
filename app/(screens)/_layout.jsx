@@ -28,6 +28,10 @@ export default function Layout() {
         name="(settings)/TempUnitChange"
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="(settings)/deleteAccount"
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }

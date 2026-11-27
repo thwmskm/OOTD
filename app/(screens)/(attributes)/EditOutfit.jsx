@@ -77,7 +77,7 @@ const EditOutfit = () => {
       } else {
         const newOid = uuid.v4().toString();
         //rate limit
-        if (!(await guardRateLimit("outiftUpload", user.uid))) return;
+        if (!(await guardRateLimit("outfitUpload", user.uid))) return;
         const downloadUrl = await storeOutfit(imageUrl, newOid, user.uid);
 
         const newOutfit = {
